@@ -1,0 +1,27 @@
+{
+  "name": "nancurunaisa",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^4.7.0",
+    "antd": "^4.19.5",
+    "antd-img-crop": "^4.2.3",
+    "gooey-react": "^1.1.0",
+    "react": "^17.0.2",
+    "react-calendar": "^3.7.0",
+    "react-dom": "^17.0.2",
+    "react-phone-input-2": "^2.15.0",
+    "react-router-dom": "^6.3.0",
+    "react-spring-bottom-sheet": "^3.4.1",
+    "recharts": "^2.1.12"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^1.0.7",
+    "vite": "^2.9.1"
+  }
+}

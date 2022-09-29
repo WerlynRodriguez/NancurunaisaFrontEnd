@@ -1,0 +1,30 @@
+@import "../../node_modules/antd/dist/antd.css";
+
+.contentVision{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 50px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.Vision{
+    border-radius: 20px;
+
+    padding: 8px;
+    margin-bottom: 30px;
+    margin-top: 50px;
+
+    font-size: 45px;
+    color: black;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+}
+
+.Comentario{
+    padding-left: 10px;
+    padding-right: 10px;
+
+    border-radius: 25px;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.40);;
+}

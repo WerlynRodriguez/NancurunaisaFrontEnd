@@ -1,0 +1,40 @@
+@import "../../node_modules/antd/dist/antd.css";
+
+.Image{
+    width: 100%;/*Horizontal*/
+    height: 500px;/*Vertical*/
+    background-size:cover;
+    background-image: url("../resources/sunrise.jpg");
+    background-position: center;
+
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: whitesmoke;
+}
+
+.Circle{
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255);
+    width: 200px;
+    height: 200px;
+
+    background-image: url(../dibujo.svg);
+    background-position: center;
+    background-size: 80%;
+    background-repeat: no-repeat;
+
+    justify-content: center;
+    align-items: center;
+    display: flex;
+
+    box-shadow: 0 16px 6px -6px rgba(0, 0, 0, 0.50);
+}
+
+.Tittle{
+    font-size: 60px;
+    color:whitesmoke;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.50);
+}

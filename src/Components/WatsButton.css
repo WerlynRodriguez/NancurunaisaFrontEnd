@@ -1,0 +1,35 @@
+.WatsButton{
+    background: #25D366;
+    color: white;
+    padding: 20px;
+    padding-left: 1.2em;
+    font-size: 17px;
+    font-weight: 500;
+    border-radius: 25px;
+    border: none;
+    display: flex;
+    align-items: center;
+    position: relative;
+    height: 50px;
+    padding-right: 3.3em;
+}
+
+.iconWats{
+    background: white;
+    margin-left: 1em;
+    position: absolute;
+    justify-content: center;
+    height: 2.2em;
+    width: 2.2em;
+    border-radius: 50px;
+    right: 0.3em;
+    background-image: url(/src//resources/WhatsLogo.svg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    transition: all 0.3s;
+}
+
+.WatsButton:hover .iconWats{
+    width: calc(100% - 0.6em);
+}

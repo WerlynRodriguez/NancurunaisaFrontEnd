@@ -1,0 +1,27 @@
+@import "../../node_modules/antd/dist/antd.css";
+
+.header{
+    background-color: white;
+    box-shadow: 0 8px 6px -6px rgba(0, 0, 0, 0.4);
+    height: 70px;
+    align-items: center;
+    position: relative;
+}
+
+.Logo{
+    text-align: center;
+}
+
+.ButtonsCol{
+    text-align: end;
+}
+
+.Button{
+    margin-right: 30px;
+}
+
+.LogoOnly{
+    width: auto;
+    height: 60px;
+}
+

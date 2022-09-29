@@ -1,0 +1,82 @@
+@import "../../Components/Colors.css";
+
+.nav{
+    position: fixed;
+    bottom: 0;
+    /*right: 0;*/
+    width: 100%;
+    left: 0;
+    align-items: center;
+    background-color: var(--bgNav);
+    border-top-left-radius: 25px;
+    border-top-right-radius: 25px;
+    /*z-index: 6;*/
+    transition: all 0.3s ease 0s;
+}
+
+.colNav{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    align-items: center;
+    background-color: var(--bgNav);
+    border-top-right-radius: 25px;
+    z-index: 10;
+    transition: all 0.3s ease 0s;
+}
+
+.unselected{
+    color: var(--colorNav);
+    display: inline-grid;
+    text-align: center;
+    align-items: center;
+    font-size: medium;
+}
+
+.unselected:hover{
+    color: var(--navActive);
+}
+
+.unselected div{
+    display: none;
+}
+
+.selected{
+    color: var(--navActive);
+    transform: translateY(-20%);
+    display: inline-grid;
+    text-align: center;
+    align-items: center;
+    font-size: x-large;
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32,1.275);
+}
+
+.selected div{
+    display: block;
+    font-size: medium;
+}
+
+.selectedHide{
+    color: var(--navActive);
+    display: inline-grid;
+    text-align: center;
+    align-items: center;
+    font-size: x-large;
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32,1.275);
+}
+
+.selectedHide div{
+    display: block;
+    font-size: small;
+}
+
+.indicator{
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    position: absolute;
+    background-color: var(--bgNav);
+    top: -35px;
+    transition: all 0.4s ease-in;
+}

@@ -37,7 +37,7 @@ export default function Ajustes(){
             case "opNot": console.log("Notificaciones"); break;
             case "opAdmU": Navigate("/Personal/Ajustes/Admin/Usuarios"); break;
             case "opAdmR": Navigate("/Personal/Ajustes/Admin/Roles"); break;
-        default: console.log("No hay nada"); break;
+        default: console.log("Error"); break;
         }
     }
 

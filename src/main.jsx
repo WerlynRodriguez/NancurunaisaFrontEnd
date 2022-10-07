@@ -39,6 +39,8 @@ import {
 import Promos from './Personal/Clinica/Promociones/Promos';
 import Promo from './Personal/Clinica/Promociones/Promo';
 import SucRep from './Personal/Reports/SucSRep';
+import AdUsers from './Personal/Perfil/Admin/AdUsers';
+import AdRols from './Personal/Perfil/Admin/AdRols';
 
 
 
@@ -116,7 +118,14 @@ function Nancurunaisa(){
             <Route path={"Sucursales/:idFec"} element={<SucRep key="RpSuc"/>}/>
           </Route>
 
-          <Route path='Ajustes' element={<Ajustes key="Settings"/>}/>
+          <Route path='Ajustes' element={<Outlet key="OutAju"/>}>
+            <Route index element={<Ajustes key="Settings"/>}/>
+            
+            <Route path="Admin" element={<Outlet key="OutAdm"/>}>
+              <Route path="Usuarios" element={<AdUsers/>}/>
+              <Route path="Roles" element={<AdRols/>}/>
+            </Route>
+          </Route>
           <Route path='*' element={<Home key="HomeD"/>}/>
         </Route>
 

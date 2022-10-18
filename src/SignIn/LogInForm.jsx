@@ -1,44 +1,47 @@
-import { LoginOutlined } from '@ant-design/icons';
+import { LockFilled, LoginOutlined, MailFilled } from '@ant-design/icons';
 import { Form, Input, Button, Checkbox, message } from 'antd';
 import React,{useState} from "react";
 import { useNavigate} from "react-router-dom";
-import { loginUser } from "../Utils/FetchingInfo";
+import { loginUserGQL } from "../Utils/FetchingInfo";
 import { decodeJWT } from '../Utils/Calwulator';
 import "./LogInForm.css";
 
-const LogInForm = () =>{
+export default function LogInForm(){
   const [form] = Form.useForm();
   const [isLoading,setloading]= useState(false);
   let Navigate = useNavigate();
 
-  async function getUserField(){
-    return form.getFieldValue("username");
-  }
-
-  async function getPassField(){
-    return form.getFieldValue("password");
-  }
-
-  const onFinish = async e =>{
-    if(!isLoading){
-      setloading(true);
-      const email = await getUserField();
-      const password = await getPassField();
-      loginUser({email,password}).then((result)=>{
-        message.success("Bienvenido",1).then((value) =>{
-        localStorage.setItem('accessToken', result.token);
-
-        const user = decodeJWT(result.token);
+  const onFinish = () =>{
+    if(isLoading) { return; }
+    setloading(true);
+    
+    //--------------------------------
+    // Send request to server to login
+    //--------------------------------
+    loginUserGQL(form.getFieldValue("username"),form.getFieldValue("password")).then((result)=>{
+      let token = result.data.authentication.token.token;
+      message.success("Bienvenido",1).then(() =>{
+        
+        // Get user info from token
+        const user = decodeJWT(token);
+        // Save user info in local storage (for remember user)
         localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('accessToken', token);
         
         setloading(false);
-        Navigate("/Personal/Home");});
-      }).catch((error)=>{
-        message.error("La contraseña o correo son incorrectos",3);
-        setloading(false);
-      })
-    }
-    
+        Navigate("/Personal/Home");
+      });
+    }).catch((error) => {
+      const newError = new Error(error);
+      let mensaje = "La contraseña o correo son incorrectos";
+      
+      if(newError.message.split(":")[1] === " Failed to fetch"){
+        mensaje = "No se pudo conectar con el servidor";
+      }
+
+      message.error(mensaje,3);
+      setloading(false);
+    });
   }
 
     return(
@@ -48,13 +51,13 @@ const LogInForm = () =>{
               required:true,
               message:"¡Introduzca su nombre de usuario!"
             }]}>
-              <Input placeholder='Usuario'/>
+              <Input type="email" placeholder="Correo" prefix={<MailFilled />} />
             </Form.Item>
             <Form.Item name="password" rules={[{
               required:true,
               message:"¡Introduzca su contraseña!"
             }]}>
-              <Input.Password placeholder='Contraseña'/>
+              <Input.Password placeholder='Contraseña' prefix={<LockFilled />}/>
             </Form.Item>
             <Form.Item>
               <Form.Item name="remember" valuePropName='checked' noStyle>
@@ -69,5 +72,3 @@ const LogInForm = () =>{
       </div>
     )
 }
-
-export default LogInForm

@@ -6,7 +6,6 @@ import ItemViewCita from '../../Components/Items/ItemViewCita';
 import "../../Utils/TextUtils.css";
 import { PlusOutlined } from '@ant-design/icons';
 import { FormActions } from '../../Utils/ActionsProviders';
-import { GetByPagCitas} from '../../Utils/FetchingInfo';
 import moment from 'moment';
 import { compareDates, compareDatesInRange, SearchDay } from '../../Utils/Calwulator';
 import { DenyFunction, getMyRange, Ranges } from '../../Utils/RangeProviders';

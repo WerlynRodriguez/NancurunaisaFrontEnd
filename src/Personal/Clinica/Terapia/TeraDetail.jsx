@@ -2,8 +2,7 @@ import {PageHeader,Typography, Layout, Form, message, Menu, Button, InputNumber,
 import { useLocation, useNavigate, useParams} from "react-router-dom";
 import React, {useState,useEffect} from 'react';
 import "../../../Utils/TextUtils.css";
-import { getaction, TerataFormActionProvider } from '../../../Utils/ActionsProviders';
-import { CreateTera, DeleteTera, GetByIdTera, UpdateTera } from '../../../Utils/FetchingInfo';
+import { getaction, ActionsProviders } from '../../../Utils/ActionsProviders';
 import { BlockRead, ButtonSubmit, FormAvName, FormPageHeader, sectionStyle } from '../../../Utils/TextUtils';
 import { NIOConvUSD, RateUSDNIO, USDConvNIO } from '../../../Utils/Calwulator';
 const { Title } = Typography;
@@ -11,7 +10,7 @@ const { Title } = Typography;
 export default function TeraDetail(){
     let Navigate = useNavigate();
     const local = useLocation();/* What is my url */
-    const ActionsProvider = new TerataFormActionProvider(getaction(local.pathname));/*Actions crud*/
+    const ActionsProvider = new ActionsProviders(getaction(local.pathname));/*Actions crud*/
     const {idTE} = useParams(); /* Params react Router fron now what is the id to want a action */
 
     const [Loading,setLoading] = useState(idTE==null? false:true);/*Fetching terapeuta info */
@@ -28,27 +27,35 @@ export default function TeraDetail(){
     /* * * * * * * * * * * * * * * * * * *  */
     /*This Functions are Only in Action UPDATE */
     /* * * * * * * * * * * * * * * * * * *  */
-    if (!ActionsProvider.isAdd) {
-        useEffect(() => {TeraGet()},[])
-    }
+    useEffect(() => {
+        if (ActionsProvider.isAdd) { return; } 
+        TeraGet();
+    },[])
+
         
     const TeraGet = () =>{
-        GetByIdTera(idTE).then((result)=>{
-            setTerapia(result);
+        // GetByIdTera(idTE).then((result)=>{
+        //     setTerapia(result);
 
-            setPSC(USDConvNIO(parseFloat(result.precioLocal)));//Precio Sucursal Cordoba
-            setPDC(USDConvNIO(parseFloat(result.precioDomicilio).toFixed(2)));//Precio Domicilio Cordoba
+        //     setPSC(USDConvNIO(parseFloat(result.precioLocal)));//Precio Sucursal Cordoba
+        //     setPDC(USDConvNIO(parseFloat(result.precioDomicilio).toFixed(2)));//Precio Domicilio Cordoba
 
-            setPSD(parseFloat(Number(result.precioLocal)));
-            setPDD(parseFloat(Number(result.precioDomicilio).toFixed(2)));
+        //     setPSD(parseFloat(Number(result.precioLocal)));
+        //     setPDD(parseFloat(Number(result.precioDomicilio).toFixed(2)));
 
-            setLoading(false);
-            form.resetFields();
-        }).catch((error)=>{
-            message.error("Hubo un error",2);
-            setloading(false);
-            Navigate(-1);
-        })
+        //     setLoading(false);
+
+        //     form.setFieldsValue({
+        //         nombreTerapia: result.nombreTerapia,
+        //         duracion: result.duracion
+        //     });
+
+        //     form.resetFields();
+        // }).catch((error)=>{
+        //     message.error("Hubo un error",2);
+        //     setloading(false);
+        //     Navigate(-1);
+        // })
     }
 
     const onFinish=()=>{
@@ -59,15 +66,15 @@ export default function TeraDetail(){
                 "duracion": form.getFieldValue("Dur"),
                 "precioDomicilio": PDD,
                 "precioLocal": PSD,}
-                CreateTera(data).then((result)=>{
-                message.success("Terapia Añadida",1).then(()=>{
-                setloading(false);
-                Navigate(-1);
-                })
-            }).catch((error)=>{
-                message.error("Hubo un error"+error,2);
-                setloading(false);
-            });
+            // CreateTera(data).then((result)=>{
+            //     message.success("Terapia Añadida",1).then(()=>{
+            //     setloading(false);
+            //     Navigate(-1);
+            //     })
+            // }).catch((error)=>{
+            //     message.error("Hubo un error"+error,2);
+            //     setloading(false);
+            // });
         }else{
             var data = {
                 "idTerapia": idTE,
@@ -76,29 +83,29 @@ export default function TeraDetail(){
                 "precioDomicilio": PDD,
                 "precioLocal": PSD,
                 "idCita":[]}
-            UpdateTera(data,idTE).then((result)=>{
-                  message.success("Terapia Modificada",1).then(()=>{
-                    setloading(false);
-                    Navigate(-1);
-                  })
-              }).catch((error)=>{
-                console.log(error);
-                    message.error("Hubo un error"+error,2);
-                    setloading(false);
-                })
+            // UpdateTera(data,idTE).then((result)=>{
+            //       message.success("Terapia Modificada",1).then(()=>{
+            //         setloading(false);
+            //         Navigate(-1);
+            //       })
+            //   }).catch((error)=>{
+            //     console.log(error);
+            //         message.error("Hubo un error"+error,2);
+            //         setloading(false);
+            //     })
         }
     }
 
     const deleteTera =()=>{
-            DeleteTera(idTE).then((result)=>{
-                message.success("Terapia Eliminada",1).then(()=>{
-                setloading(false);
-                Navigate(-1);
-                })
-            }).catch((error)=>{
-                message.error("Hubo un error"+error,2);
-                setloading(false);
-            })
+            // DeleteTera(idTE).then((result)=>{
+            //     message.success("Terapia Eliminada",1).then(()=>{
+            //     setloading(false);
+            //     Navigate(-1);
+            //     })
+            // }).catch((error)=>{
+            //     message.error("Hubo un error"+error,2);
+            //     setloading(false);
+            // })
     }
 
     const userMenu = (
@@ -112,30 +119,58 @@ export default function TeraDetail(){
 
     return(<div>
         <BlockRead Show={ActionsProvider.isRead}/>
-        <FormPageHeader ActionProv={ActionsProvider} Text="Terapia" menu={userMenu}/>
-        <div className='BackImageCollapsible' style={{display:ActionsProvider.isAdd? "none":""}}/>
-        <FormAvName ActionProv={ActionsProvider} Loading={Loading} Avatar={""} Text={Terapia.name}/>
 
-        <Layout className='ContentLayout' style={{display:Loading ? "None":""}}>
-            <Form onFinish={()=>{onFinish()}} onFinishFailed={(e)=>{form.scrollToField(e.errorFields[0].name)}} 
-            initialValues={{Nombre:Terapia.nombreTerapia,Dur:Terapia.duracion}} 
-            form={form} size='Default' style={{marginTop:"25px",maxWidth:"600px",width:"100%"}}>
+        <FormPageHeader 
+        ActionProv={ActionsProvider} 
+        Text="Terapia" 
+        menu={userMenu}/>
+
+        <div 
+        className='BackImageCollapsible' 
+        style={{display:ActionsProvider.isAdd? "none":""}}/>
+
+        <FormAvName 
+        ActionProv={ActionsProvider} 
+        Loading={Loading} 
+        Avatar={""} 
+        Text={Terapia.name}/>
+
+        <Layout 
+        className='ContentLayout' 
+        style={{display:Loading ? "None":""}}>
+
+            <Form 
+            onFinish={()=>{onFinish()}} 
+            onFinishFailed={(e)=>{form.scrollToField(e.errorFields[0].name)}}
+            form={form} 
+            size='Default' 
+            style={{marginTop:"25px",maxWidth:"600px",width:"100%"}}>
                 
                 <div style={sectionStyle}>
                     <Title level={4}>Descripción</Title>
-                    <Form.Item name="Nombre" label="Nombre:" rules={[{
-                        required:true,message:"¡Introduzca el Nombre!"}]}>
-                        <Input type="text" maxLength={30} placeholder='Nombre'/>
+                    <Form.Item 
+                    name="nombreTerapia" 
+                    label="Nombre:" 
+                    rules={[{required:true,message:"¡Introduzca el Nombre!"}]}>
+
+                        <Input 
+                        type="text" 
+                        maxLength={30} 
+                        placeholder='Nombre'/>
+
                     </Form.Item>
                 </div>
 
                 <div style={{float:"right",backgroundColor:"rgb(89,32,133)",borderRadius:"25px",padding:"5px",marginTop:"5px"}}>
-                    <Typography.Text style={{color:"white"}}>{"1$ = C$"+RateUSDNIO}</Typography.Text>
+                    <Typography.Text 
+                    style={{color:"white"}}>
+                        {"1$ = C$"+RateUSDNIO}
+                    </Typography.Text>
                 </div>
                 <div style={sectionStyle}>
                     <Title level={4}>Detalles</Title><div>
 
-                    <Form.Item name="Dur" label="Duracion:" rules={[{
+                    <Form.Item name="duracion" label="Duracion:" rules={[{
                         required:true,message:"¡Introduzca la Duración!"}]}>
                         <InputNumber style={{width:"50%"}} type="number" maxLength={3} prefix="Min" placeholder='Duración'/>
                     </Form.Item>

@@ -1,10 +1,9 @@
-import { TerataFormActionProvider } from "../../../Utils/ActionsProviders";
+import { ActionsProviders } from "../../../Utils/ActionsProviders";
 import { BlockRead, ButtonSubmit, FormPageHeader, sectionStyle } from "../../../Utils/TextUtils";
 import React, {useState,useEffect} from 'react';
 import { Factura } from "../../../Models/Models";
 import { Button, Divider, Form, Input, InputNumber, Layout, Menu, message, Typography } from "antd";
 import { useNavigate } from "react-router-dom";
-import { CreateFact } from "../../../Utils/FetchingInfo";
 const { Title } = Typography;
 
 export default function FacturaDet (props) {
@@ -13,7 +12,7 @@ export default function FacturaDet (props) {
     const [isLoading,setloading]= useState(false);
 
     const [Loading,setLoading] = useState(idFactura==null? false:true);
-    const ActionsProvider = new TerataFormActionProvider(action);/*Actions crud*/
+    const ActionsProvider = new ActionsProviders(action);/*Actions crud*/
     const [Factu,setFactu] = useState([]);/* All terapeuta info after fetching */
 
     const [form] = Form.useForm();

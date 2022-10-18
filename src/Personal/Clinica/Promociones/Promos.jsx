@@ -4,7 +4,6 @@ import Searchbar from "../../../Components/SearchBar";
 import ItemView from '../../../Components/Items/TerapeutaItem';
 import { useNavigate} from "react-router-dom";
 import React, {useState,useEffect} from 'react';
-import { GetbyPagPromos, SearchPromos } from "../../../Utils/FetchingInfo";
 import { Promocion } from "../../../Models/Models";
 import { CheckOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { MapSelectedItems } from "../../../Utils/TextUtils";
@@ -41,15 +40,15 @@ export default function Promos(props) {
 
     const getPromos=(Page,search)=>{
         setLoadingList(true);
-        GetbyPagPromos(Page,perPageDefault,search).then((result)=>{
-            setTotalItems(result.pages*perPageDefault);
-            const data = [];
-            result.promociones.map((item)=>{
-                data.push(new Promocion(item.idPromocion,item.nombrePromocion,item.descripcion,MultiData.find((sel)=>{return sel.idPromocion==item.idPromocion})? true:false));
-            });
-            setList(data);
-        }).catch((err)=>{
-            message.error(err);});
+        // GetbyPagPromos(Page,perPageDefault,search).then((result)=>{
+        //     setTotalItems(result.pages*perPageDefault);
+        //     const data = [];
+        //     result.promociones.map((item)=>{
+        //         data.push(new Promocion(item.idPromocion,item.nombrePromocion,item.descripcion,MultiData.find((sel)=>{return sel.idPromocion==item.idPromocion})? true:false));
+        //     });
+        //     setList(data);
+        // }).catch((err)=>{
+        //     message.error(err);});
     }
 
     const onSearch = (value) =>{

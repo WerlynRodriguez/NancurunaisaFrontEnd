@@ -8,7 +8,19 @@ const { Title } = Typography;
 
 function ButtonLink(props){
     return(<Link to={props.to}>
-        <Row className='Cardview'>
+        <Row 
+        className="Cardview"
+        style={{
+            minWidth: "300px",
+            minHeight: "100px",
+            borderRadius: "20px",
+            marginTop: "15px",
+            backgroundColor: "white",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow:"6px 6px 12px #c5c5c5, -6px -6px 12px #ffffff",
+            transition: "transition: all .3s"
+        }}>
             <Col className='ColCardTitle' span={18}>
                 <Title level={3}>{props.title}</Title>
             </Col>
@@ -19,21 +31,40 @@ function ButtonLink(props){
     </Link>)
 }
 
+//This component is the main page of the clinica seccions
 export default function Clinica(){
     return(<div>
         <div className="BackMenu"/>
-        <Title level={2} style={{marginTop:"20px",marginLeft:"20px",color:"white"}}>Clínica</Title>
+        <Title 
+        level={2} 
+        style={{marginTop:"20px",marginLeft:"20px",color:"white"}}>
+            Clínica
+        </Title>
 
         <Layout className='ContentLayout' style={{borderTopLeftRadius:"50px",borderTopRightRadius:"50px",backgroundColor:"white"}}>
-            <ButtonLink to='/Personal/Clinica/Pacientes' title="Pacientes" icon={<SmileFilled style={{color:"#5a33ae",fontSize:"40px"}}/>}/>
+            <ButtonLink 
+            to='/Personal/Clinica/Pacientes' 
+            title="Pacientes" 
+            icon={<SmileFilled style={{color:"#5a33ae",fontSize:"40px"}}/>}/>
             
-            <ButtonLink to ="/Personal/Clinica/Terapeutas" title="Terapeutas" icon={<MedicineBoxFilled style={{color:"#5a33ae",fontSize:"40px"}}/>}/>
+            <ButtonLink 
+            to="/Personal/Clinica/Terapeutas" 
+            title="Terapeutas" 
+            icon={<MedicineBoxFilled style={{color:"#5a33ae",fontSize:"40px"}}/>}/>
 
-            <ButtonLink to='/Personal/Clinica/Terapias' title='Terapias' icon={<HeartOutlined style={{color:"#5a33ae",fontSize:"40px"}}/>}/>
+            <ButtonLink 
+            to='/Personal/Clinica/Terapias' 
+            title='Terapias' 
+            icon={<HeartOutlined style={{color:"#5a33ae",fontSize:"40px"}}/>}/>
             
-            <ButtonLink to='/Personal/Clinica/Sucursales' title='Sucursales' icon={<EnvironmentFilled style={{color:"#5a33ae",fontSize:"40px"}}/>}/>
+            <ButtonLink 
+            to='/Personal/Clinica/Sucursales' 
+            title='Sucursales' icon={<EnvironmentFilled style={{color:"#5a33ae",fontSize:"40px"}}/>}/>
 
-            <ButtonLink to="/Personal/Clinica/Promos" title="Promociones" icon={<PercentageOutlined style={{color:"#5a33ae",fontSize:"40px"}}/>}/>
+            <ButtonLink 
+            to="/Personal/Clinica/Promos" 
+            title="Promociones" 
+            icon={<PercentageOutlined style={{color:"#5a33ae",fontSize:"40px"}}/>}/>
         </Layout>
         </div>)
 }

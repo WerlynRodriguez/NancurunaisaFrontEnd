@@ -1,6 +1,5 @@
 import React, {useState,useEffect} from 'react';
-import {GetByIdTeraTa, CreateTeraTa, DeleteLogicTeraTa, UpdateTeraTa} from '../../../Utils/FetchingInfo';
-import { TerataFormActionProvider,getaction} from '../../../Utils/ActionsProviders';
+import { ActionsProviders,getaction} from '../../../Utils/ActionsProviders';
 import {Typography, Skeleton,Layout,Select,Form,Image, Button, Dropdown, Avatar} from 'antd';
 import {Input,DatePicker,Divider, Upload,message,Menu} from 'antd';
 import "../../../Utils/TextUtils.css";
@@ -23,7 +22,7 @@ const { Option } = Select;
 export default function TerapeutaDetail(){
   let Navigate = useNavigate();
   const local = useLocation();/* What is my url */
-  const ActionsProvider = new TerataFormActionProvider(getaction(local.pathname));/*Actions crud*/
+  const ActionsProvider = new ActionsProviders(getaction(local.pathname));/*Actions crud*/
   const {idTA} = useParams(); /* Params react Router fron now what is the id to want a action */
 
   const [Loading,setLoading] = useState(idTA==null? false:true);/*Fetching terapeuta info */

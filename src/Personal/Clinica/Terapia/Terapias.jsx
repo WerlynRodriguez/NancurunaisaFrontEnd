@@ -5,7 +5,6 @@ import "../../../Utils/TextUtils.css";
 import { CheckOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import Searchbar from '../../../Components/SearchBar';
 import ItemView from "../../../Components/Items/TerapeutaItem";
-import { GetByPagTera, SearchTera } from '../../../Utils/FetchingInfo';
 import { FormActions } from '../../../Utils/ActionsProviders';
 import { MapSelectedItems } from '../../../Utils/TextUtils';
 import SelectedItem from '../../../Components/Items/SelectedItem';
@@ -24,7 +23,7 @@ export default function Terapias(props){
     const [LoadingList,setLoadingList] = useState(true);
 
     const isPicker = props.picker==true? true:false;
-    const isMulti = props.multi==true? true:false
+    const isMulti = props.multi==true? true:false;
 
     const [MultiData,setMultiData] = useState(props.data? props.data:[]);
     const grid = isPicker? {}:{ gutter: 16, xs: 1, sm: 1, md: 2,lg: 2,xl: 3,xxl: 3 }
@@ -41,14 +40,14 @@ export default function Terapias(props){
 
     const getTeras=(Page,search)=>{
         setLoadingList(true);
-        GetByPagTera(Page,perPageDefault,search)
-        .then((result)=>{
-            setTotalItems(result.pages*perPageDefault);
-            const data=[];
-            result.terapias.map((item)=>{
-                data.push(new Terapia(item.idTerapia,item.nombreTerapia,item.duracion,item.precioDomicilio,item.precioLocal,MultiData.find((sel)=>{return sel.idTerapia==item.idTerapia})? true:false));
-            });
-            setList(data);}).catch((error)=>{message.error(error.message)});
+        // GetByPagTera(Page,perPageDefault,search)
+        // .then((result)=>{
+        //     setTotalItems(result.pages*perPageDefault);
+        //     const data=[];
+        //     result.terapias.map((item)=>{
+        //         data.push(new Terapia(item.idTerapia,item.nombreTerapia,item.duracion,item.precioDomicilio,item.precioLocal,MultiData.find((sel)=>{return sel.idTerapia==item.idTerapia})? true:false));
+        //     });
+        //     setList(data);}).catch((error)=>{message.error(error.message)});
     }
 
     const setSelectedPac =(index,sel)=>{

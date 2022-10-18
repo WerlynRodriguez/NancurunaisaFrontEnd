@@ -2,8 +2,7 @@ import { Button, Collapse, Divider, Form, Input, Layout, List, Menu, message, Sp
 import { EditOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import React, {useState,useEffect} from 'react';
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { TerataFormActionProvider, getaction } from "../../../Utils/ActionsProviders";
-import { CreateHab, CreateSucur, DeleteSucur, GetByIdSucur, UpdateHab, UpdateSucursal } from "../../../Utils/FetchingInfo";
+import { ActionsProviders, getaction } from "../../../Utils/ActionsProviders";
 import { BlockRead, ButtonSubmit, FormAvName, FormPageHeader, sectionStyle } from "../../../Utils/TextUtils";
 import { BottomSheet } from "react-spring-bottom-sheet";
 import { Habitacion, Sucursal } from "../../../Models/Models";
@@ -16,7 +15,7 @@ const {Panel} = Collapse;
 export default function SucurDetail(){
     let Navigate = useNavigate();
     const local = useLocation();/* What is my url */
-    const ActionsProvider = new TerataFormActionProvider(getaction(local.pathname));/*Actions crud*/
+    const ActionsProvider = new ActionsProviders(getaction(local.pathname));/*Actions crud*/
     const {idSU} = useParams(); /* Params react Router fron now what is the id to want a action */
 
     const [Loading,setLoading] = useState(idSU==null? false:true);/*Fetching terapeuta info */
@@ -38,18 +37,18 @@ export default function SucurDetail(){
         
     const SucurGet = () =>{
         setLoading(true);
-        GetByIdSucur(idSU).then((result)=>{
-            setLoading(false);
-            setSucursal(new Sucursal(result.idSucursal,result.nombreSucursal,result.direccion,false));
-            /*cuartoss.map((item)=>{
-                data.push({idHabitacion:item.idHabitacion,nombreHabitacion:item.nombreHabitacion})
-            });*/
-            setCuartos(result.habitacion);
-            form.resetFields();
-        }).catch((err)=>{
-            setLoading(false);
-            message.error(err);
-        })
+        // GetByIdSucur(idSU).then((result)=>{
+        //     setLoading(false);
+        //     setSucursal(new Sucursal(result.idSucursal,result.nombreSucursal,result.direccion,false));
+        //     /*cuartoss.map((item)=>{
+        //         data.push({idHabitacion:item.idHabitacion,nombreHabitacion:item.nombreHabitacion})
+        //     });*/
+        //     setCuartos(result.habitacion);
+        //     form.resetFields();
+        // }).catch((err)=>{
+        //     setLoading(false);
+        //     message.error(err);
+        // })
     }
 
     const onFinish=()=>{
@@ -63,39 +62,39 @@ export default function SucurDetail(){
                 "habitacion": [],
                 "masajista": []
             }
-            CreateSucur(data).then((result)=>{
-                message.success("Sucursal Añadida",1).then(()=>{
-                setloading(false);
-                Navigate(-1);
-                })
-            }).catch((error)=>{
-                message.error("Error al añadir sucursal",1).then(()=>{
-                setloading(false);
-                })
-            })
+            // CreateSucur(data).then((result)=>{
+            //     message.success("Sucursal Añadida",1).then(()=>{
+            //     setloading(false);
+            //     Navigate(-1);
+            //     })
+            // }).catch((error)=>{
+            //     message.error("Error al añadir sucursal",1).then(()=>{
+            //     setloading(false);
+            //     })
+            // })
         }else{
             var data = {'id':idSU,"name": form.getFieldValue("Nombre")}
-            UpdateSucursal(data).then((result)=>{
-                if (result['status'] === 'ok'){
-                  message.success("Sucursal Modificada",1).then(()=>{
-                    setloading(false);
-                    Navigate(-1);
-                  })
-                }else{message.error("No se pudo Modificar",2);setloading(false);}
-              })
+            // UpdateSucursal(data).then((result)=>{
+            //     if (result['status'] === 'ok'){
+            //       message.success("Sucursal Modificada",1).then(()=>{
+            //         setloading(false);
+            //         Navigate(-1);
+            //       })
+            //     }else{message.error("No se pudo Modificar",2);setloading(false);}
+            //   })
         }
     }
 
     const deleteSucur =()=>{
         var data = {'id':idSU}
-            DeleteSucur(data).then((result)=>{
-            if (result['status'] === 'ok'){
-                message.success("Sucursal Eliminada",1).then(()=>{
-                setloading(false);
-                Navigate(-1);
-                })
-            }else{message.error("No se pudo Eliminar",2);setloading(false);}
-            })
+            // DeleteSucur(data).then((result)=>{
+            // if (result['status'] === 'ok'){
+            //     message.success("Sucursal Eliminada",1).then(()=>{
+            //     setloading(false);
+            //     Navigate(-1);
+            //     })
+            // }else{message.error("No se pudo Eliminar",2);setloading(false);}
+            // })
     }
 
     const MiniFormCubiculo = () =>{
@@ -116,17 +115,17 @@ export default function SucurDetail(){
                         "idSucursal":idSU,
                         "nombreHabitacion":nombre,
                         "cita":[]};
-                    CreateHab(data).then((result)=>{
-                        setCuartos([...Cuartos,data]);
-                        message.success("Cubiculo Añadido",1).then(()=>{
-                        setloading(false);
-                        setSheet(false);
-                        })
-                    }).catch((error)=>{
-                        message.error("Error al añadir cubiculo",1).then(()=>{
-                        setloading(false);
-                        })
-                    })
+                    // CreateHab(data).then((result)=>{
+                    //     setCuartos([...Cuartos,data]);
+                    //     message.success("Cubiculo Añadido",1).then(()=>{
+                    //     setloading(false);
+                    //     setSheet(false);
+                    //     })
+                    // }).catch((error)=>{
+                    //     message.error("Error al añadir cubiculo",1).then(()=>{
+                    //     setloading(false);
+                    //     })
+                    // })
                 } else {
                     setLoading(true);
                     var data = {

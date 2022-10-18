@@ -8,25 +8,24 @@ function get6text(text) {
   }
 }
 
-function convertLetterToNumber(letter) {
-    return letter.charCodeAt(0) - 65;
-}
-
-
 export default function selectedItem(props){
+  const {index,item,onClick} = props;
 
-  const onClick = () => {
-    if (typeof props.onClick === 'function') {
-        props.onClick(props.index);
-    }
-  }
+  return (
+  <Space 
+  style={{marginRight:"5px"}}>
 
-  return (<Space style={{marginRight:"5px"}}>
-    <div onClick={()=>{onClick()}} style={{display:"flex",flexDirection:"column",alignItems:"center"}}>
-        <Avatar size="large" src={props.avatar? props.avatar:null}>
-            {props.avatar? null:props.text[0]}
+    <div 
+    onClick={()=>{onClick(item.id,index)}} 
+    style={{display:"flex",flexDirection:"column",alignItems:"center"}}>
+
+        <Avatar 
+        size="large" 
+        src={item.pic? item.pic:null}>
+            {item.pic? null:item.title[0]}
         </Avatar>
-        {get6text(props.text)}
+
+        {get6text(item.title)}
     </div>
   </Space>)
 }

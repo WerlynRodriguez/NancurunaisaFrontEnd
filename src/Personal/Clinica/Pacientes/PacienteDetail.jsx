@@ -4,9 +4,8 @@ import { BlockRead, ButtonSubmit, FormAvName, FormPageHeader, sectionStyle, ValD
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { getaction, TerataFormActionProvider } from "../../../Utils/ActionsProviders";
+import { getaction, ActionsProviders } from "../../../Utils/ActionsProviders";
 import { useEffect, useState } from "react";
-import { CreatePac, DeletePac, GetByIdPac, UpdatePac } from "../../../Utils/FetchingInfo";
 import moment from 'moment';/*What Day is? */
 import { DeleteOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import { AFP, AFPStrings, AnamAStrings, APNP, APNPStrings, APP, APPStrings } from "../../../Utils/Anamnesis";
@@ -16,7 +15,7 @@ const {Title} = Typography
 export default function PacSDetail(){
     let Navigate = useNavigate();
     const local = useLocation();/* What is my url */
-    const ActionsProvider = new TerataFormActionProvider(getaction(local.pathname));/*Actions crud*/
+    const ActionsProvider = new ActionsProviders(getaction(local.pathname));/*Actions crud*/
     const {idPA} = useParams(); /* Params react Router fron now what is the id to want a action */
 
     const [Loading,setLoading] = useState(idPA==null? false:true);/*Fetching terapeuta info */
@@ -29,20 +28,21 @@ export default function PacSDetail(){
 
     const [Pac,setPac] = useState([]);/* All terapeuta info after fetching */
 
-    if (!ActionsProvider.isAdd) {
-        useEffect(() => {PacGet()},[])
-    }
+    useEffect(() => {
+        if (ActionsProvider.isAdd) { return; }
+        PacGet();
+    },[])
 
     const PacGet = () =>{
-        GetByIdPac(idPA).then((result)=>{
-            setLoading(false);
-            setPac(result);
-            //setisWorking();
-            form.resetFields();
-        }).catch((err)=>{
-            setLoading(false);
-            message.error(err);
-        })
+        // GetByIdPac(idPA).then((result)=>{
+        //     setLoading(false);
+        //     setPac(result);
+        //     //setisWorking();
+        //     form.resetFields();
+        // }).catch((err)=>{
+        //     setLoading(false);
+        //     message.error(err);
+        // })
     }
 
     const onFinish=()=>{
@@ -60,37 +60,37 @@ export default function PacSDetail(){
                 "fecha_nacimiento": moment(form.getFieldValue("Birth")).format("YYYY-MM-DD"),
                 "amnanesis": []
             }
-            CreatePac(data).then((result)=>{
-                message.success("Paciente Añadido",1).then(()=>{
-                setloading(false);
-                Navigate(-1);})
-            }).catch((err)=>{
-                setloading(false);
-                message.error(err);
-            })
+            // CreatePac(data).then((result)=>{
+            //     message.success("Paciente Añadido",1).then(()=>{
+            //     setloading(false);
+            //     Navigate(-1);})
+            // }).catch((err)=>{
+            //     setloading(false);
+            //     message.error(err);
+            // })
         }else{
             var data = {'id':idPA,"fname": form.getFieldValue("Nombres")}
-            UpdatePac(data).then((result)=>{
-                if (result['status'] === 'ok'){
-                    message.success("Paciente Modificado",1).then(()=>{
-                    setloading(false);
-                    Navigate(-1);
-                  })
-                }else{message.error("No se pudo Modificar",2);setloading(false);}
-              })
+            // UpdatePac(data).then((result)=>{
+            //     if (result['status'] === 'ok'){
+            //         message.success("Paciente Modificado",1).then(()=>{
+            //         setloading(false);
+            //         Navigate(-1);
+            //       })
+            //     }else{message.error("No se pudo Modificar",2);setloading(false);}
+            //   })
         }
     }
 
     const deletePac =()=>{
         var data = {'id':idPA}
-            DeletePac(data).then((result)=>{
-            if (result['status'] === 'ok'){
-                message.success("Paciente Eliminado",1).then(()=>{
-                setloading(false);
-                Navigate(-1);
-                })
-            }else{message.error("No se pudo Eliminar",2);setloading(false);}
-            })
+            // DeletePac(data).then((result)=>{
+            // if (result['status'] === 'ok'){
+            //     message.success("Paciente Eliminado",1).then(()=>{
+            //     setloading(false);
+            //     Navigate(-1);
+            //     })
+            // }else{message.error("No se pudo Eliminar",2);setloading(false);}
+            // })
     }
 
     const userMenu = (
@@ -108,23 +108,41 @@ export default function PacSDetail(){
 
 
     return(<div>
-        <BlockRead Show={ActionsProvider.isRead}/>
-        <FormPageHeader ActionProv={ActionsProvider} Text="Paciente" menu={userMenu}/>
-        <div className='BackImageCollapsible' style={{display:ActionsProvider.isAdd? "none":""}}/>
+        <BlockRead 
+        Show={ActionsProvider.isRead}/>
 
-        <FormAvName ActionProv={ActionsProvider} Loading={Loading} Avatar={""} Text={Pac.nombres+" "+Pac.apellidos}/>
+        <FormPageHeader 
+        ActionProv={ActionsProvider} 
+        Text="Paciente" 
+        menu={userMenu}/>
 
-        <Layout className='ContentLayout' style={{display:Loading ? "None":""}}>
+        <div 
+        className='BackImageCollapsible' 
+        style={{display:ActionsProvider.isAdd? "none":""}}/>
+
+        <FormAvName 
+        ActionProv={ActionsProvider} 
+        Loading={Loading} 
+        Avatar={""} 
+        Text={Pac.nombres+" "+Pac.apellidos}/>
+
+        <Layout 
+        className='ContentLayout' 
+        style={{display:Loading ? "None":""}}>
             <div style={{zIndex:"6",display:ActionsProvider.isAdd? "none":"flex"}}>
             <WatsButton number="+50581248928"/>
             </div>
 
-            <Form onFinish={()=>{onFinish()}} onFinishFailed={(e)=>{form.scrollToField(e.errorFields[0].name)}} 
+            <Form 
+            onFinish={()=>{onFinish()}} 
+            onFinishFailed={(e)=>{form.scrollToField(e.errorFields[0].name)}} 
             initialValues={{Nombres:Pac.nombres, Apellidos:Pac.apellidos,Phone:"505"+Pac.numCel,
             Country:Pac.nacionalidad, Gender:Pac.sexo,Birth:moment("1990/01/01", "YYYY/MM/DD"),
             AFPValues:["Nuez", "Cerveza"],APPValues:["Amigdalitis"],
             APNPValues:[{"Des":"Cocaina","C":2,"F":"D"}]}} 
-            form={form} size='Default' style={{marginTop:"25px",maxWidth:"600px",width:"100%"}}>
+            form={form} 
+            size='Default' 
+            style={{marginTop:"25px",maxWidth:"600px",width:"100%"}}>
 
                 <div style={sectionStyle}>
                     <Title level={4}>Información Personal</Title>
@@ -132,21 +150,25 @@ export default function PacSDetail(){
                     {validator: (_, value) => ValDoubleName(value,"nombres")}]}>
                         <Input type="text" maxLength={30} placeholder='Nombres'/>
                     </Form.Item>
+
                     <Divider/>
                     <Form.Item name="Apellidos" label="Apellidos:" rules={[
                     {validator: (_, value) => ValDoubleName(value,"apellidos")}]}>
                         <Input placeholder='Apellidos'/>
                     </Form.Item>
+
                     <Divider/>
                     <Form.Item label="Nacionalidad:" name="Country" rules={[{
                     required:true,message:"¡Introduzca la Nacionalidad!"}]}>
                         <Input placeholder='Nacionalidad'/>
                     </Form.Item>
+
                     <Divider/>
                     <Form.Item label="Fecha de nacimiento:" name="Birth" rules={[{
                     required:true,message:"¡Introduzca la fecha de Nacimiento!"}]}>
                         <DatePicker inputReadOnly={true} picker="date"/>
                     </Form.Item>
+
                     <Divider/>
                     <Form.Item label="Género:" name="Gender" rules={[{required:true,message:"¡Seleccione el género!"}]}>
                         <Select>

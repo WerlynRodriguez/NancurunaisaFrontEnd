@@ -1,4 +1,4 @@
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import React from 'react';
 import Landing from "./Landing/Landing";
 import SignIn from './SignIn/SignIn';
@@ -41,6 +41,7 @@ import Promo from './Personal/Clinica/Promociones/Promo';
 import SucRep from './Personal/Reports/SucSRep';
 import AdUsers from './Personal/Perfil/Admin/AdUsers';
 import AdRols from './Personal/Perfil/Admin/AdRols';
+import UserDetail from './Personal/Perfil/Admin/UserDetail';
 
 
 
@@ -123,6 +124,13 @@ function Nancurunaisa(){
             
             <Route path="Admin" element={<Outlet key="OutAdm"/>}>
               <Route path="Usuarios" element={<AdUsers/>}/>
+              <Route path="Usuario" element={<Outlet key="OutU"/>}>
+
+                <Route path={FormActions.Add} element={<UserDetail key="UserAdd"/>}/>
+                <Route path={FormActions.Read+"/:idUS"} element={<UserDetail key="UserRead"/>}/>
+                <Route path={FormActions.Update+"/:idUS"} element={<UserDetail key="UserUpdt"/>}/>
+              </Route>
+
               <Route path="Roles" element={<AdRols/>}/>
             </Route>
           </Route>
@@ -135,7 +143,7 @@ function Nancurunaisa(){
   )
 }
 
-ReactDOM.render(
-  <Nancurunaisa/>,
-  document.getElementById('root')
-);
+const root = ReactDOM.createRoot( document.getElementById('root') );
+const app = <Nancurunaisa/>
+
+root.render(app);

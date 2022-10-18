@@ -1,4 +1,4 @@
-export class TerataFormActionProvider{
+export class ActionsProviders{
     constructor(ActAct){
         this.ActAct = ActAct;
     }
@@ -7,9 +7,9 @@ export class TerataFormActionProvider{
     get isAdd(){return this.ActAct==FormActions.Add? true:false}
 }
 
-export function getaction(url){
+export function getaction(url,pos){
     const action = url.split("/");
-    return action[4];
+    return action[pos];
 }
 
 export const FormActions={ Read:"View", Update:"Uptd", Add:"Add" }

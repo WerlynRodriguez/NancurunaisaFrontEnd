@@ -3,14 +3,13 @@ import { BlockRead, ButtonSubmit, FormAvName, FormPageHeader, sectionStyle } fro
 import React, {useState,useEffect} from 'react';
 import { Promocion } from "../../../Models/Models";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { getaction, TerataFormActionProvider } from "../../../Utils/ActionsProviders";
-import { CreatePromo, GetByIdPromo, GetbyPagPromos, UpdatePromo } from "../../../Utils/FetchingInfo";
+import { getaction, ActionsProviders } from "../../../Utils/ActionsProviders";
 const { Title } = Typography;
 
 export default function Promo() {
     let Navigate = useNavigate();
     const local = useLocation();/* What is my url */
-    const ActionsProvider = new TerataFormActionProvider(getaction(local.pathname));/*Actions crud*/
+    const ActionsProvider = new ActionsProviders(getaction(local.pathname));/*Actions crud*/
     const {idP} = useParams(); /* Params react Router fron now what is the id to want a action */
 
     const [Loading,setLoading] = useState(idP==null? false:true);/*Fetching terapeuta info */
@@ -26,15 +25,15 @@ export default function Promo() {
     }
     const PromoGet = () =>{
         setLoading(true);
-        GetByIdPromo(idP).then((result)=>{
-            setPromo(result);
-            setLoading(false);
-            form.resetFields();
-        }).catch((error)=>{
-            message.error("Hubo un error",2);
-            setloading(false);
-            Navigate(-1);
-        });
+        // GetByIdPromo(idP).then((result)=>{
+        //     setPromo(result);
+        //     setLoading(false);
+        //     form.resetFields();
+        // }).catch((error)=>{
+        //     message.error("Hubo un error",2);
+        //     setloading(false);
+        //     Navigate(-1);
+        // });
     }
 
     const onFinish =() =>{
@@ -46,14 +45,14 @@ export default function Promo() {
                 "activo": true,
                 "idCita":[]
             }
-            CreatePromo(data).then((result)=>{
-                message.success("Promocion creada",2);
-                setloading(false);
-                Navigate(-1);
-            }).catch((error)=>{
-                message.error("Hubo un error",2);
-                setloading(false);
-            });
+            // CreatePromo(data).then((result)=>{
+            //     message.success("Promocion creada",2);
+            //     setloading(false);
+            //     Navigate(-1);
+            // }).catch((error)=>{
+            //     message.error("Hubo un error",2);
+            //     setloading(false);
+            // });
         }else{
             var data = {
                 "idPromocion": idP,
@@ -62,14 +61,14 @@ export default function Promo() {
                 "activo": true,
                 "idCita":[]
             }
-            UpdatePromo(idP,data).then((result)=>{
-                message.success("Promocion actualizada",2);
-                setloading(false);
-                Navigate(-1);
-            }).catch((error)=>{
-                message.error("Hubo un error",2);
-                setloading(false);
-            });
+            // UpdatePromo(idP,data).then((result)=>{
+            //     message.success("Promocion actualizada",2);
+            //     setloading(false);
+            //     Navigate(-1);
+            // }).catch((error)=>{
+            //     message.error("Hubo un error",2);
+            //     setloading(false);
+            // });
         }
     }
 

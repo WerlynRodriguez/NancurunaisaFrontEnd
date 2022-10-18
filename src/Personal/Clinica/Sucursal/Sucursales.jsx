@@ -1,6 +1,5 @@
 import {PageHeader,Typography, Layout, Input,Empty, List, Pagination, Button} from 'antd';
 import { useNavigate} from "react-router-dom";
-import { GetByPagSucur, SearchSucur } from '../../../Utils/FetchingInfo';
 import React, {useState,useEffect} from 'react';
 import ItemView from "../../../Components/Items/TerapeutaItem";
 import Searchbar from "../../../Components/SearchBar";
@@ -42,15 +41,15 @@ export default function Sucursales(props){
 
     const getSucurs=(Page,search)=>{
         setLoadingList(true);
-        GetByPagSucur(Page,perPageDefault,search)
-        .then((result)=>{
-            setTotalItems(result.pages*perPageDefault);
-            const data = [];
-            result.sucursales.map((item)=>{
-                data.push(new Sucursal(item.idSucursal,item.nombreSucursal,"",MultiData.find((sel)=>{return sel.idSucursal==item.idSucursal})? true:false));
-            });
+        // GetByPagSucur(Page,perPageDefault,search)
+        // .then((result)=>{
+        //     setTotalItems(result.pages*perPageDefault);
+        //     const data = [];
+        //     result.sucursales.map((item)=>{
+        //         data.push(new Sucursal(item.idSucursal,item.nombreSucursal,"",MultiData.find((sel)=>{return sel.idSucursal==item.idSucursal})? true:false));
+        //     });
 
-            setList(data);})
+        //     setList(data);})
     }
 
     const setSelectedItem =(index,sel)=>{

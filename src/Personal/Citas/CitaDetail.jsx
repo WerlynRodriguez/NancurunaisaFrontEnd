@@ -2,7 +2,7 @@ import { Button, Collapse, Divider, Input, Layout, List, Menu, message, Radio, S
 import './CitaDetail.css';
 import React, {useState,useEffect} from 'react';
 import { useLocation, useNavigate, useParams} from "react-router-dom";
-import { FormActions, TerataFormActionProvider } from "../../Utils/ActionsProviders";
+import { FormActions, ActionsProviders } from "../../Utils/ActionsProviders";
 import { CarFilled, EditOutlined, EnvironmentFilled, LayoutFilled, PlusOutlined, TeamOutlined } from "@ant-design/icons";
 import MiniPicker from "../../Components/Picker/miniPicker";
 import TeraTaItem from "../../Components/Items/TerapeutaItem";
@@ -21,7 +21,6 @@ import { AllowFunction, DenyFunction, Ranges } from "../../Utils/RangeProviders"
 import Sucursales from "../Clinica/Sucursal/Sucursales";
 import Cubiculos from "../Clinica/Sucursal/Cubiculos";
 import FacturaDet from "../Clinica/Facturas/Factura";
-import { AddPacsCita, CreateCita, GetByIdCita } from "../../Utils/FetchingInfo";
 
 function getaction(url){
     const action = url.split("/");
@@ -31,7 +30,7 @@ function getaction(url){
 export default function CitaDetail(){
     let Navigate = useNavigate();
     const local = useLocation();/* What is my url */
-    const ActionsProvider = new TerataFormActionProvider(getaction(local.pathname));/*Actions crud*/
+    const ActionsProvider = new ActionsProviders(getaction(local.pathname));/*Actions crud*/
     const {idCita} = useParams();
     const [isLoading,setloading]= useState(false);/*For Add teratas */
     
@@ -110,21 +109,21 @@ export default function CitaDetail(){
 
     const getPicker=()=>{
         switch (Picker) {
-            case 0: return <Pacientes multi={true} data={Pacs} onBack={()=>{setShowSheet(false)}} 
+            case 0: return <Pacientes picker multi data={Pacs} onBack={()=>{setShowSheet(false)}} 
                             onFinish={(value)=>{setPacs(value);setShowSheet(false)}}/>
 
-            case 1: return <Terapias multi={true} data={Teras} onBack={()=>{setShowSheet(false)}} 
+            case 1: return <Terapias picker multi data={Teras} onBack={()=>{setShowSheet(false)}} 
                             onFinish={(value)=>{setTeras(value);setShowSheet(false)}}/>
 
-            case 2: return <Terapeutas multi={true} data={TeraTas} onBack={()=>{setShowSheet(false)}}
+            case 2: return <Terapeutas picker multi data={TeraTas} onBack={()=>{setShowSheet(false)}}
                             onFinish={(value)=>{setTeraTas(value);setShowSheet(false)}}/>
 
-            case 3: return <Promos multi={true} data={PromoS} onBack={()=>{setShowSheet(false)}}
+            case 3: return <Promos picker multi data={PromoS} onBack={()=>{setShowSheet(false)}}
                             onFinish={(value)=>{setPromos(value);setShowSheet(false)}}/>
 
-            case 4: return <Sucursales picker={true} onBack={()=>{setShowSheet(false)}} onFinish={(value)=>{setSucur(value);setCub([]);setShowSheet(false)}}/>
+            case 4: return <Sucursales picker onBack={()=>{setShowSheet(false)}} onFinish={(value)=>{setSucur(value);setCub([]);setShowSheet(false)}}/>
 
-            case 5: return <Cubiculos idSuc={Sucur.idSucursal} picker={true} onBack={()=>{setShowSheet(false)}} onFinish={(value)=>{setCub(value);setShowSheet(false)}}/>
+            case 5: return <Cubiculos picker idSuc={Sucur.idSucursal} onBack={()=>{setShowSheet(false)}} onFinish={(value)=>{setCub(value);setShowSheet(false)}}/>
 
             case 6: return <FacturaDet action={FormActions.Add} idCita={0} onBack={()=>{setShowSheet(false)}}/>
 

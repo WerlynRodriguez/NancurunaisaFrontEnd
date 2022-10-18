@@ -59,9 +59,10 @@ export function FormAvName(props){
           <Avatar style={{width:"120px",height:"120px",display:Loading || avatar? "None":""}}/>
           <Image src={avatar} style={{display:Loading || !avatar? "None":"" ,width:"120px",height:"120px",borderRadius:"50%",border:"5px solid white"}}/>
         </div>
-        <div style={{marginTop:"70px"}}>
+        <div style={{marginTop:"70px",textAlign:"center"}}>
           <Skeleton.Input active={Loading} size="large" style={{display:Loading ? "":"None"}}/>
           <Title level={2} style={{display:Loading ? "None":""}}>{props.Text}</Title>
+          <Title level={5} style={{display:Loading ? "None":""}}>{props.SubTitle}</Title>
         </div>
       </Layout>
     )
@@ -70,10 +71,18 @@ export function FormAvName(props){
 //Button of forms submitt
 export function ButtonSubmit(props){
   const ActionsProvider = props.ActionProv;
+  if (ActionsProvider.isRead) return null;
   return(
-    <Form.Item>
-      <Button icon={ActionsProvider.isUpdt?<EditOutlined/>:<PlusOutlined/>} type='primary' style={{width:"100%",marginTop:"20px"}} size='large' loading={props.isLoading} shape='round' htmlType='submit'>
-      {ActionsProvider.isUpdt? "Actualizar":"Añadir"}</Button>
+      <Form.Item>
+        <Button 
+        icon={ActionsProvider.isUpdt?<EditOutlined/>:<PlusOutlined/>} 
+        type='primary' style={{width:"100%",marginTop:"20px"}} 
+        size='large' 
+        loading={props.isLoading} 
+        shape='round' 
+        htmlType='submit'>
+          {ActionsProvider.isUpdt? "Actualizar":"Añadir"}
+        </Button>
     </Form.Item>
   )
 }

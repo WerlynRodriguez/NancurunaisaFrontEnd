@@ -4,9 +4,9 @@ import React, {useState,useEffect} from 'react';
 import "../../../Utils/TextUtils.css";
 import { CheckOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import ItemView from '../../../Components/Items/TerapeutaItem';
-import { getFirstWord, MapSelectedItems } from '../../../Utils/TextUtils';
+import { MapSelectedItems } from '../../../Utils/TextUtils';
 import Searchbar from '../../../Components/SearchBar';
-import { GetByPagPacS, SearchPacS } from '../../../Utils/FetchingInfo';
+import { getByPag } from '../../../Utils/FetchingInfo';
 import { FormActions } from '../../../Utils/ActionsProviders';
 import { AllowFunction, Ranges } from '../../../Utils/RangeProviders';
 import {Paciente} from '../../../Models/Models';
@@ -17,11 +17,13 @@ const { Title } = Typography;
 export default function Pacientes(props){
     let Navigate = useNavigate();/*Go back */
     const [PacS, setPacS] = useState([]);
-    const perPageDefault = 5;
+    
     const [totalItems,setTotalItems] = useState(0);
     const [LoadingList,setLoadingList] = useState(true);
-    const [search,setSearch] = useState("");
-    const [page,setPage] = useState(1);
+    
+    var countItems = 0;
+    var search = "";
+    const [perPageDefault,setpPD] = useState(5);
 
     const isPicker = props.picker==true? true:false
     const isMulti = props.multi==true? true:false
@@ -31,7 +33,7 @@ export default function Pacientes(props){
 
     const [selectionMode,setSelectionMode] = useState(isMulti?true:false);//is selection mode
     useEffect(() => {
-        getPacS(page,search)
+        getPacS()
       }, [])
 
     const setList = (result) =>{
@@ -39,27 +41,42 @@ export default function Pacientes(props){
         setLoadingList(false);
     }
 
-    const getPacS=(Page,search)=>{
+    const getPacS=()=>{
         setLoadingList(true);
-        GetByPagPacS(Page,perPageDefault,search)
-        .then((result)=>{
-            setTotalItems(result.pages*perPageDefault);
-            const data = [];
-            result.pacientes.map((item)=>{
-                data.push(new Paciente(item.idPaciente,item.nombres,item.apellidos,"F",12,"","","","","",MultiData.find((sel)=>{return sel.idPaciente==item.id})? true:false));
+
+        const items = `idPaciente
+        nombres
+        apellidos`;
+
+        const searchQuery = `or:[
+            {nombres: {contains:"${search}"}}
+            {apellidos: {contains:"${search}"}}
+        ]`;
+
+        const orderQuery = `nombres: ASC`;
+
+        console.log(perPageDefault)
+        getByPag("paciente",items,countItems,perPageDefault,searchQuery,orderQuery)
+        .then((res)=>{
+            setTotalItems(res.totalCount);
+            const data = res.items.map((item)=>{
+                return new Paciente(item.idPaciente,item.nombres,item.apellidos,"F",12,"","","","","",MultiData.find((sel)=>{return sel.idPaciente==item.id})? true:false);
             });
-            setList(data);})
+            setList(data);
+        }).catch((error)=>{
+            console.log(error);
+        });
     }
 
     const onSearch = (value) =>{
-        setSearch(value);
-        setPage(1);
-        getPacS(1,value);
+        search = value;
+        countItems = 0;
+        getPacS();
     }
 
     const onChangePage = (page) =>{
-        setPage(page);
-        getPacS(page,search);
+        countItems = (page-1)*perPageDefault;
+        getPacS();
     }
     const setSelectedPac =(index,sel)=>{
         let newArr = [...PacS]; // copying the old datas array
@@ -100,7 +117,7 @@ export default function Pacientes(props){
         }
     }
 
-    const onLongPress = (id,name,selected,index) => {
+    const onLongPress = (id,selected,index) => {
         if(isPicker){
             props.onFinish(PacS[index]);
         }else{
@@ -114,7 +131,7 @@ export default function Pacientes(props){
         }        
     }
 
-    const onclick=(id,name,selected,index)=>{
+    const onclick=(id,selected,index)=>{
         if(isPicker){
             props.onFinish(PacS[index]);
         }else if (isMulti){
@@ -159,12 +176,13 @@ export default function Pacientes(props){
         <button className='BottomRoundButton' onClick={()=>{onClickAddPacs()}} style={{display:isPicker||isMulti?"none":""}}><PlusOutlined/></button>
         <button className='BottomRoundButton' onClick={()=>{props.onFinish(MultiData)}} style={{display:selectionMode && isMulti?"":"none"}}><CheckOutlined/></button>
         <Layout className='ContentLayout'>
-            <Searchbar search={search} onSearch={(value)=>{onSearch(value)}} loading={LoadingList}/>
-            <Pagination onChange={(page)=>{onChangePage(page)}} defaultPageSize={perPageDefault} total={totalItems} style={{marginTop:"10px"}}/>
+            <Searchbar onSearch={(value)=>{onSearch(value)}} loading={LoadingList}/>
+            <Pagination onChange={(page)=>{onChangePage(page)}} defaultPageSize={5} total={totalItems} defaultCurrent={1}
+            style={{marginTop:"10px"}} onShowSizeChange={(current, size)=>{setpPD(size);onChangePage(current)}}/>
             <List style={{marginTop:"10px"}} loading={LoadingList} grid={grid}
             dataSource={PacS} renderItem={(pacS,index) => (
-                <ItemView id={pacS.idPaciente} avatar={""} onClick={(id,name,selected)=>{onclick(id,name,selected,index)}}
-                onLongPress={(id,name,selected)=>{onLongPress(id,name,selected,index)}} mulSelMode={selectionMode}
+                <ItemView id={pacS.idPaciente} avatar={""} onClick={(id,selected)=>{onclick(id,selected,index)}}
+                onLongPress={(id,selected)=>{onLongPress(id,selected,index)}} mulSelMode={selectionMode}
                 text={pacS.getShortName} selected={pacS.selected}/>
             )}/>
         </Layout>

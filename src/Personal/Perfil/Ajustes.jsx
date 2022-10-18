@@ -36,6 +36,7 @@ export default function Ajustes(){
         switch(e.key){
             case "opNot": console.log("Notificaciones"); break;
             case "opAdmU": Navigate("/Personal/Ajustes/Admin/Usuarios"); break;
+            //case "opAdmU": Navigate("/Personal/Clinica/Terapeutas"); break;
             case "opAdmR": Navigate("/Personal/Ajustes/Admin/Roles"); break;
         default: console.log("Error"); break;
         }

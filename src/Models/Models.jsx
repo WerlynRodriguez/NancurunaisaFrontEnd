@@ -1,5 +1,32 @@
 import { getFirstWord } from "../Utils/TextUtils";
 
+//For display in a generic list of items
+export class Item{
+    constructor(id,title,subtTitle,pic,selected){
+        this.id=id;
+        this.title=title;
+        this.subtTitle=subtTitle;
+        this.pic=pic;
+        this.selected=selected;
+    }
+}
+
+//User of the app
+export class User{
+    constructor(user){
+        this.idUsuario = user.idUsuario
+        this.email = user.email;
+        this.nombres = user.nombres;
+        this.apellidos = user.apellidos;
+        this.fechaNacimiento = user.fechaNacimiento;
+        this.foto = user.foto;
+        this.numCel = user.numCel;
+        this.sexo = user.sexo;
+        this.activo = user.activo;
+        this.idRol = user.idRol;
+    }
+}
+
 export class Paciente{
     constructor(idPaciente,nombres,apellidos,sexo,edad,nacionalidad,profesion_oficio,horas_trabajo,numCel,fecha_nacimiento,selected){
         this.idPaciente = idPaciente;

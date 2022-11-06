@@ -31,7 +31,14 @@ export default function Citas(props){
     
     const [selectedDate, setSelectedDate] = useState(moment(DayToday));//Selected Date in the calendar
 
-    const BadgesStatus = ["Todos","warning","error","success","processing"];//Status of citas
+    const BadgesStatus = ["Todos","warning","error","success","processing","default"];//Status of citas
+    /*
+    success: cita pendiente (green)
+    error: cita cancelada (red)
+    warning: cita en espera de facturar (yellow)
+    processing: cita en proceso (blue)
+    default: cita finalizada (gray)
+     */
     const [BadgeOptions,setBadgeOptions] = useState(0);//BadgeOptions for the status of citas displayed in the calendar
 
     const [LoadingList,setLoadingList] = useState(true);//is fetching data from the server calendar
@@ -52,11 +59,7 @@ export default function Citas(props){
     }
 
     const getCitas=(Age)=>{
-        setLoadingList(true);
-        GetByPagCitas(Age)
-        .then((result)=>{
-            setList(result);
-        })
+        setLoadingList(false);
     }
 
     const onNavigate = (date,mode) => {
@@ -178,29 +181,71 @@ export default function Citas(props){
     }
     
     return(<div>
-        <div className="BackMenu"/>
-        <Typography.Title level={2} style={{marginTop:"20px",marginLeft:"20px",color:"white"}}>Citas</Typography.Title>
-        <button className='BottomRoundButton' onClick={()=>{onclickAddCita()}}><PlusOutlined/></button>
+        <div 
+        className="BackMenu"/>
 
-        <Skeleton.Button active={true} size='large' shape="square" block style={{display:LoadingList?"":"none",width:"100%",height:"400px"}}/>
+        <Typography.Title 
+        level={2} 
+        style={{marginTop:"20px",marginLeft:"20px",color:"white"}}>
+            Citas
+        </Typography.Title>
 
-        <Layout style={{borderTopLeftRadius:"50px",borderTopRightRadius:"50px",paddingTop:"20px",paddingRight:"20px",paddingLeft:"20px",display:LoadingList?"none":""}}>
-            <Select bordered={false} value={BadgeOptions} onChange={(v)=>{setBadgeOptions(v)}}>
+        <button 
+        className='BottomRoundButton' 
+        onClick={()=>{onclickAddCita()}}>
+            <PlusOutlined/>
+        </button>
+
+        <Skeleton.Button 
+        active={true} 
+        size='large' 
+        shape="square" 
+        block 
+        style={{display:LoadingList?"":"none",width:"100%",height:"400px"}}/>
+
+        <Layout 
+        style={{borderTopLeftRadius:"50px",borderTopRightRadius:"50px",
+        paddingTop:"20px",paddingRight:"20px",paddingLeft:"20px",display:LoadingList?"none":""}}>
+
+            <Select 
+            bordered={false} 
+            value={BadgeOptions} 
+            onChange={(v)=>{setBadgeOptions(v)}}>
+
                 <Option key={0} value={0}>{BadgesStatus[0]}</Option>
                 <Option key={1} value={1}><Badge status={BadgesStatus[1]}/>Terminados</Option>
                 <Option key={2} value={2}><Badge status={BadgesStatus[2]}/>Sin Facturar</Option>
                 <Option key={3} value={3}><Badge status={BadgesStatus[3]}/>Pendientes</Option>
                 <Option key={4} value={4}><Badge status={BadgesStatus[4]}/>Activos</Option>
+
             </Select>
-            <Calendar onPanelChange={onNavigate}
-            dateCellRender={(value)=> getEvents(value)} value={selectedDate} 
-            onChange={(value)=>{onChangeSelectedDate(value)}} fullscreen={false}/>
+
+            <Calendar 
+            onPanelChange={onNavigate}
+            dateCellRender={(value)=> getEvents(value)} 
+            value={selectedDate} 
+            onChange={(value)=>{onChangeSelectedDate(value)}} 
+            fullscreen={false}/>
+
         </Layout>
-        <Layout className="ContentLayout" >
-            <List style={{marginTop:"40px"}} loading={LoadingList} grid={grid}
-                dataSource={ListCitas} renderItem={(cita,index) => (
-                    <ItemViewCita id={cita.idCita} status={getSatusCita(cita.pendiente,cita.fechaHora)} 
-                    hora={cita.fechaHora} hab={cita.habitacion} dir={cita.direccion} onClick={(id)=>{onclickCita(id)}}/>
+
+        <Layout 
+        className="ContentLayout" >
+
+            <List 
+            style={{marginTop:"40px"}} 
+            loading={LoadingList} 
+            grid={grid}
+            dataSource={ListCitas} 
+            renderItem={(cita,index) => (
+
+                    <ItemViewCita 
+                    id={cita.idCita} 
+                    status={getSatusCita(cita.pendiente,cita.fechaHora)} 
+                    hora={cita.fechaHora} 
+                    hab={cita.habitacion} 
+                    dir={cita.direccion} 
+                    onClick={(id)=>{onclickCita(id)}}/>
                 )}/>
         </Layout>
     </div>)

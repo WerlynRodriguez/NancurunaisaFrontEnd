@@ -6,7 +6,6 @@ import Searchbar from "../../../Components/SearchBar";
 import "../../../Utils/TextUtils.css";
 import { CheckOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { FormActions } from '../../../Utils/ActionsProviders';
-import { Sucursal } from '../../../Models/Models';
 import { MapSelectedItems } from '../../../Utils/TextUtils';
 import SelectedItem from '../../../Components/Items/SelectedItem';
 import { DenyFunction, Ranges } from '../../../Utils/RangeProviders';

@@ -7,23 +7,50 @@ export const sectionStyle={border:"2px solid rgb(89,32,133)",marginTop:"15px",bo
 borderRadius:"20px",padding:"5px"}/*Purple Border of Form */
 
 export const DropdownFilterMenu = (props) => (
-  <Dropdown key="more" overlay={props.menu} placement="bottomRight" trigger={['click']}>
-    <Button style={{backgroundColor:"rgba(0,0,0,0.5)"}} shape="circle" type='ghost' size='large'><ControlOutlined style={{fontSize: 20,color:"white"}} /></Button>
+  <Dropdown 
+  key="more" 
+  overlay={props.menu} 
+  placement="bottomRight" 
+  trigger={['click']}>
+
+    <Button 
+    style={{backgroundColor:"rgba(0,0,0,0.5)"}} 
+    shape="circle" 
+    type='ghost' 
+    size='large'>
+
+      <ControlOutlined 
+      style={{fontSize: 20,color:"white"}}/>
+
+    </Button>
   </Dropdown>)
 
-export const DropdownMenu = (props) => (
-    <Dropdown key="more" overlay={props.menu} placement="bottomRight" trigger={['click']}>
-      <Button style={{backgroundColor:"rgba(0,0,0,0.5)"}} shape="circle" type='ghost' size='large'><MoreOutlined style={{fontSize: 20,color:"white"}} /></Button>
-    </Dropdown>)
+export const DropdownMenu = (props) => props.active ? (
+    <Dropdown 
+    key="more" 
+    overlay={props.menu} 
+    placement="bottomRight"
+    trigger={['click']}>
+
+      <Button 
+      style={{backgroundColor:"rgba(0,0,0,0.5)"}} 
+      shape="circle" 
+      type='ghost' 
+      size='large'>
+
+        <MoreOutlined 
+        style={{fontSize: 20,color:"white"}} />
+        
+      </Button>
+    </Dropdown>) : null;
 
 export const getFirstWord=(text)=>{const aux = text.split(" "); return aux[0];}
 
 export const ValDoubleName=(value,text)=>{
-  if (!value) return Promise.reject(new Error("¡Introduzca los "+text+"!"));
+  if (!value) return Promise.reject(new Error("¡Introduzca un "+text+"!"));
   const aux = value.includes(" ")? value.split(" "):null;
-  if (aux==null) return Promise.reject(new Error("¡Introduzca almenos dos "+text+"!"));
-  if (aux[1]=="") return Promise.reject(new Error("¡Introduzca almenos dos "+text+"!"));
-  if (aux.length>3) return Promise.reject(new Error("¡No mas de 3 "+text+"!"));
+  if (aux==null) return Promise.reject(new Error("¡Introduzca almenos un "+text+"!"));
+  if (aux.length>3) return Promise.reject(new Error("¡El "+text+" sobrepasa el tamaño!"));
   return Promise.resolve();
 }
 
@@ -34,12 +61,39 @@ export function FormPageHeader(props){
     const ActionsProvider = props.ActionProv;
     let Navigate = useNavigate();
 
-    return (<PageHeader onBack={()=>{onBack?onBack():Navigate(-1)}} style={{zIndex:normal==true?"":"6"}} backIcon={ !ActionsProvider.isAdd?
-        <Button style={{backgroundColor:"rgba(0,0,0,0.5)"}} shape="circle" type='ghost' size='large'>
-            <ArrowLeftOutlined style={{fontSize: 15,color:"white"}}/>
-        </Button>:<ArrowLeftOutlined style={{fontSize: 15}}/>}
-        title={<Title style={{color:ActionsProvider.isAdd?"":"white"}} level={3}>{ActionsProvider.isAdd? "Añadir "+props.Text:props.Text}</Title>} 
-        extra={[ActionsProvider.isUpdt? <DropdownMenu key={1} menu={props.menu} />:null]}/>)
+    return (
+    <PageHeader 
+    onBack={()=>{onBack?onBack():Navigate(-1)}} 
+    style={{zIndex:normal==true?"":"6"}} 
+    backIcon={ !ActionsProvider.isAdd?
+        
+        <Button 
+        style={{backgroundColor:"rgba(0,0,0,0.5)"}} 
+        shape="circle" 
+        type='ghost' 
+        size='large'>
+
+            <ArrowLeftOutlined 
+            style={{fontSize: 15,color:"white"}}/>
+
+        </Button>
+        :
+        <ArrowLeftOutlined 
+        style={{fontSize: 15}}/>}
+
+    title={
+
+      <Title 
+      style={{color:ActionsProvider.isAdd?"":"white"}} 
+      level={3}>{ActionsProvider.isAdd? "Añadir "+props.Text:props.Text}</Title>
+    }
+    extra={[
+      <DropdownMenu
+      active={ActionsProvider.isUpdt} 
+      key={1} 
+      menu={props.menu} />
+    ]}/>
+    )
 }
 
 export function BlockRead(props){
@@ -49,20 +103,48 @@ export function BlockRead(props){
 /*Display a beatiful avatar with a name */
 export function FormAvName(props){
     const ActionsProvider = props.ActionProv;
-    const Loading = props.Loading;
-    const avatar = props.Avatar;
+    const {Loading, Pic, Text, SubTitle} = props;
 
     return(
-        <Layout className='CollapsibleHeaderOff' style={{display:ActionsProvider.isAdd? "none":"flex"}}>
+        <Layout 
+        className='CollapsibleHeaderOff' 
+        style={{display:ActionsProvider.isAdd? "none":"flex"}}>
+          
         <div style={{position:"absolute",top:"150px",zIndex:"6"}}>
-          <Skeleton.Avatar active={Loading} style={{display:Loading ? "":"None",width:"120px",height:"120px"}}/>
-          <Avatar style={{width:"120px",height:"120px",display:Loading || avatar? "None":""}}/>
-          <Image src={avatar} style={{display:Loading || !avatar? "None":"" ,width:"120px",height:"120px",borderRadius:"50%",border:"5px solid white"}}/>
+
+          <Skeleton.Avatar 
+          active={Loading} 
+          style={{display:Loading ? "":"None",width:"120px",height:"120px"}}/>
+          
+          <Avatar
+          size="large"
+          style={{width:"120px",height:"120px",fontSize:"50px",display:Loading?"none":"flex",
+          alignItems:"center",border:"3px solid white",boxShadow:"0px 0px 15px #000000"}}
+          src={Pic}>
+            {Pic? null:Text? Text[0]:null}
+          </Avatar>
+
         </div>
-        <div style={{marginTop:"70px",textAlign:"center"}}>
-          <Skeleton.Input active={Loading} size="large" style={{display:Loading ? "":"None"}}/>
-          <Title level={2} style={{display:Loading ? "None":""}}>{props.Text}</Title>
-          <Title level={5} style={{display:Loading ? "None":""}}>{props.SubTitle}</Title>
+
+        <div 
+        style={{marginTop:"70px",textAlign:"center"}}>
+
+          <Skeleton.Input 
+          active={Loading} 
+          size="large" 
+          style={{display:Loading ? "":"None"}}/>
+
+          <Title 
+          level={2} 
+          style={{display:Loading ? "None":""}}>
+            {Text}
+          </Title>
+
+          <Title 
+          level={5} 
+          style={{display:Loading ? "None":""}}>
+            {SubTitle}
+          </Title>
         </div>
       </Layout>
     )
@@ -75,7 +157,10 @@ export function ButtonSubmit(props){
   return(
       <Form.Item>
         <Button 
-        icon={ActionsProvider.isUpdt?<EditOutlined/>:<PlusOutlined/>} 
+        icon={ActionsProvider.isUpdt?
+          <EditOutlined/>
+          :
+          <PlusOutlined/>} 
         type='primary' style={{width:"100%",marginTop:"20px"}} 
         size='large' 
         loading={props.isLoading} 
@@ -89,11 +174,21 @@ export function ButtonSubmit(props){
 
 //Map list of selected items
 export function MapSelectedItems(props){
+  const {data, itemRender} = props;
   return(
-    <div style={{display:props.data.length==0?"none":"flex",flexDirection:"column"}}>
-        <Typography.Text>Seleccionados: {props.data.length}</Typography.Text>
-        <div style={{display:"inline"}}>
-            {props.data.map((item,index)=>(props.item(item,index)))}
+    <div 
+    style={{display:data.length==0?"none":"flex",flexDirection:"column"}}>
+
+        <Typography.Text>
+          Seleccionados: {data.length}
+        </Typography.Text>
+
+        <div 
+        style={{display:"inline",overflowX:"scroll",overflowY:"hidden",whiteSpace:"nowrap",padding:"5px"}}>
+
+            {data.map((item,index)=>
+              (itemRender(item,index))
+            )}
         </div>
     </div>
   )

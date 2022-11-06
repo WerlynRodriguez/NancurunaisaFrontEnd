@@ -2,17 +2,16 @@
 @import "../Colors.css";
 
 .ItemTera{
+    width: 100%;
+    height: 100%;
     border-radius: 25px;
     background-color: white;
-    margin-top: 5px;
     padding-top: 8px;
     padding-left: 2px;
     padding-right: 2px;
     padding-bottom: 8px;
     margin-left: 10px;
     margin-right: 10px;
-    min-width: 300px;
-    width: 100%;
     align-items: center;
 }
 
@@ -20,4 +19,23 @@
     border-style: ridge;
     border-width: 2px;
     border-color: var(--focusColor);
+}
+
+.comunItem{
+    width: 100%;
+    border-radius: 25px;
+
+    padding-top: 8px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-bottom: 8px;
+
+    margin-top: 10px;
+
+    align-items: center;
+    transition: all 0.3s ease-in-out;
+}
+
+.comunItem:hover{
+    cursor: pointer;
 }

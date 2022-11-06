@@ -5,13 +5,13 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "react-scripts start" 
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
     "antd": "^4.23.4",
     "antd-img-crop": "^4.2.3",
-    "gooey-react": "^1.1.0",
     "react": "^18.2.0",
     "react-calendar": "^3.7.0",
     "react-dom": "^18.2.0",

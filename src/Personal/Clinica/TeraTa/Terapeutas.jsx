@@ -1,16 +1,16 @@
-import {PageHeader,Typography, Layout, Input, List, Pagination, Collapse, Button, message} from 'antd';/*osiris */
+import {PageHeader,Typography, Layout, Input, List, Pagination, Collapse, Button, message, Menu} from 'antd';/*osiris */
 import { useNavigate} from "react-router-dom";
 import { getByPag } from '../../../Utils/FetchingInfo';
 import React, {useState,useEffect} from 'react';
 import "../../../Utils/TextUtils.css";
 import Searchbar from '../../../Components/SearchBar';
-import { CheckOutlined, ControlOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { CheckOutlined, ControlOutlined, DeleteOutlined, FilterFilled, PlusOutlined } from '@ant-design/icons';
 import { FormActions } from '../../../Utils/ActionsProviders';
-import { getFirstWord, MapSelectedItems } from '../../../Utils/TextUtils';
+import { DropdownMenu, getFirstWord, MapSelectedItems } from '../../../Utils/TextUtils';
 import { Item } from '../../../Models/Models';
 import SelectedItem from '../../../Components/Items/SelectedItem';
 import { AllowFunction, Ranges } from '../../../Utils/RangeProviders';
-import MultiSelectList from '../../../Utils/MultiSelectList';
+import MultiSelectList from '../../../Components/MultiSelectList';
 const { Title } = Typography;
 
 function getTitle(a,b){
@@ -136,6 +136,16 @@ export default function Terapeutas(props){
     Navigate("/Personal/Clinica/Terapeuta/"+FormActions.Add);
   }
 
+  const userMenu = (
+    <Menu
+    style={{width:"200px",borderRadius:"20px"}}
+    //theme="dark"
+    items={[
+        {key:"item1", label:"Activar", onClick:()=>{}},
+        {key:"item2", label:"Desactivar", onClick:()=>{}},
+    ]}/>
+  );
+
   return(
     <Layout>
       <PageHeader 
@@ -149,17 +159,21 @@ export default function Terapeutas(props){
       </Title>}
       extra={<>
 
-        <Button 
-        style={{display:selectionMode && !picker?"":"none"}} 
-        shape="circle" 
-        size='large' 
-        onClick={()=>{/*This will be Delete */}} 
-        icon={<DeleteOutlined/>}/>
+        <Button
+        shape='circle'
+        size='large'
+        onClick={()=>{}}
+        icon={<FilterFilled />}/>
+
+        <DropdownMenu
+        key="1"
+        active={selectionMode}
+        menu={userMenu}/>
       </>}>
           
           <MapSelectedItems 
           data={MultiData} 
-          item={(item,index)=>(
+          itemRender={(item,index)=>(
 
             <SelectedItem 
             key={index}
@@ -203,7 +217,7 @@ export default function Terapeutas(props){
         setSelectionMode={(v)=>{setSelectionMode(v)}}
         multiData={MultiData}
         setMultiData={(v)=>{setMultiData(v)}}
-        onClick={(item)=>{console.log("Clicked in Normal Mode")}}
+        onClick={(item)=>{Navigate("/Personal/Clinica/Terapeuta/"+FormActions.Update+"/"+item.id);}}
         pickerMode={({
           picker:picker,
           multi:multi,

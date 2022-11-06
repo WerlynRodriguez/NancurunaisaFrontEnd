@@ -1,6 +1,7 @@
 import { List } from "antd";
-import ItemView from "../Components/Items/TerapeutaItem";
+import TerapeutaItem from "./Items/TerapeutaItem";
 import React, {useEffect} from 'react';
+import { NavLink } from "react-router-dom";
 //This is the display of generic items in the list
 //but supporting the selection of multiple items
 //for normal and picker mode.
@@ -8,22 +9,24 @@ export default function MultiSelectList(props) {
     const {
         items,
         setItems,
+        renderItem,
         loading,
         selectionMode,
         setSelectionMode,
         multiData,
         setMultiData,
-        onClick,
-        pickerMode,
+        pickerSettings,
     } = props;
+
+    const {picker, multi, dataPicked, onBack, onFinish} = pickerSettings;
 
     let isPicker = false;
     let isMultiPicker = false;
 
     useEffect(() => {
-        if (pickerMode.picker){
+        if (picker){
             isPicker = true;
-            if (pickerMode.multi){
+            if (multi){
                 isMultiPicker = true;
             }
         }
@@ -67,7 +70,7 @@ export default function MultiSelectList(props) {
     // Validate when the user clicks on an item in the list
     // and if it is in multi selection mode, in normal mode and in picker mode
     //======================================================================
-    const onclick=(item,index)=>{
+    const onclick=(item,index,Click)=>{
         if(isPicker){
             if(isMultiPicker){
                 //If it is a multi picker mode, it will add or remove the item from the list
@@ -75,7 +78,7 @@ export default function MultiSelectList(props) {
                 setMultiSelected(item,index);
             }else{
                 //On picker mode, the item is selected and the list is closed
-                pickerMode.onFinish(item);
+                onFinish(item);
             }
         }else {
            if(selectionMode){
@@ -83,7 +86,7 @@ export default function MultiSelectList(props) {
                 setMultiSelected(item,index);
             }else{
                 //On normal mode, just select the item
-                onClick(item);
+                Click(item);
             }
         }
     }
@@ -95,7 +98,7 @@ export default function MultiSelectList(props) {
     const onLongPress = (item,index) => {
         //If is in picker mode but isn't a multi picker mode, the item is selected and the list is closed
         if(isPicker && !isMultiPicker){
-            pickerMode.onFinish(item);
+            onFinish(item);
             return;
         }
         if(selectionMode){
@@ -110,18 +113,24 @@ export default function MultiSelectList(props) {
     }
 
     return (
-    <List 
-    style={{marginTop:"40px"}} 
+    <List
+    size="small"
+    style={{width:"100%",marginTop:"40px"}}
+    itemLayout="horizontal" 
     loading={loading} 
     grid={{ gutter: 16, xs: 1, sm: 1, md: 2,lg: 2,xl: 3,xxl: 3 }}
     dataSource={items} 
-    renderItem={(item,index) => (
+    renderItem={(item,index) => 
+        renderItem(item,index,onclick,onLongPress,selectionMode)
+    }/>
+    // renderItem={(item,index) => (
 
-        <ItemView
-        item={item}
-        onClick={(item)=>{onclick(item,index)}}
-        onLongPress={(item)=>{onLongPress(item,index)}} 
-        mulSelMode={selectionMode}/>
-    )}/>
+    //     <TerapeutaItem
+    //     item={item}
+    //     onClick={(item)=>{onclick(item,index)}}
+    //     onLongPress={(item)=>{onLongPress(item,index)}} 
+    //     mulSelMode={selectionMode}/>
+    // )
+    //}
     )
 }

@@ -15,7 +15,6 @@ import Terapeutas from "../Clinica/TeraTa/Terapeutas";
 import { BlockRead, ButtonSubmit, FormPageHeader, getFirstWord } from "../../Utils/TextUtils";
 import { BottomSheet } from 'react-spring-bottom-sheet';
 import 'react-spring-bottom-sheet/dist/style.css';
-import {Habitacion, Paciente, Promocion, Sucursal, Terapeuta, Terapia} from "../../Models/Models";
 import moment from 'moment';
 import { AllowFunction, DenyFunction, Ranges } from "../../Utils/RangeProviders";
 import Sucursales from "../Clinica/Sucursal/Sucursales";
@@ -109,16 +108,16 @@ export default function CitaDetail(){
 
     const getPicker=()=>{
         switch (Picker) {
-            case 0: return <Pacientes picker multi data={Pacs} onBack={()=>{setShowSheet(false)}} 
+            case 0: return <Pacientes picker multi dataPicked={Pacs} onBack={()=>{setShowSheet(false)}} 
                             onFinish={(value)=>{setPacs(value);setShowSheet(false)}}/>
 
-            case 1: return <Terapias picker multi data={Teras} onBack={()=>{setShowSheet(false)}} 
+            case 1: return <Terapias picker multi dataPicked={Teras} onBack={()=>{setShowSheet(false)}} 
                             onFinish={(value)=>{setTeras(value);setShowSheet(false)}}/>
 
-            case 2: return <Terapeutas picker multi data={TeraTas} onBack={()=>{setShowSheet(false)}}
+            case 2: return <Terapeutas picker multi dataPicked={TeraTas} onBack={()=>{setShowSheet(false)}}
                             onFinish={(value)=>{setTeraTas(value);setShowSheet(false)}}/>
 
-            case 3: return <Promos picker multi data={PromoS} onBack={()=>{setShowSheet(false)}}
+            case 3: return <Promos picker multi dataPicked={PromoS} onBack={()=>{setShowSheet(false)}}
                             onFinish={(value)=>{setPromos(value);setShowSheet(false)}}/>
 
             case 4: return <Sucursales picker onBack={()=>{setShowSheet(false)}} onFinish={(value)=>{setSucur(value);setCub([]);setShowSheet(false)}}/>
@@ -201,81 +200,216 @@ export default function CitaDetail(){
     );
 
     return (<div>
-    <BlockRead Show={ActionsProvider.isRead}/>
-    <FormPageHeader ActionProv={ActionsProvider} Text="Cita" menu={userMenu} normal={showSheet}/>
-    <div className='BackImageCollapsible' style={{display:ActionsProvider.isAdd? "none":""}}/>
-    <BottomSheet snapPoints={({ minHeight, maxHeight }) => [300, 650]} open={showSheet} onDismiss={()=>{setShowSheet(false)}}>
+    <BlockRead 
+    Show={ActionsProvider.isRead}/>
+
+    <FormPageHeader 
+    ActionProv={ActionsProvider} 
+    Text="Cita" 
+    menu={userMenu} 
+    normal={showSheet}/>
+
+    <div 
+    className='BackImageCollapsible' 
+    style={{display:ActionsProvider.isAdd? "none":""}}/>
+
+    <BottomSheet 
+    snapPoints={({ minHeight, maxHeight }) => [300, 650]} 
+    open={showSheet} 
+    onDismiss={()=>{setShowSheet(false)}}>
         {getPicker()}
     </BottomSheet>
     
-    <Layout className='ContentLayout'>
-    <Skeleton style={{display:gettingCita?"":"none"}} loading active/>
-    <div style={{width:"100%",maxWidth:"800px",paddingTop:"15px",
-    display:gettingCita?"none":"flex",flexDirection:"column",paddingLeft:"10px",paddingRight:"10px",paddingBottom:"10px",
-    borderRadius:"25px",textAlign:"center",backgroundColor:"#212121",boxShadow:"0 5px 15px rgba(14,21,37,0.8)"}}>
-        <input style={{width:"100%",backgroundColor:"#212121",color:"white",borderWidth:"0",fontSize:"50px"}}
-        type="time" value={time} onChange={(e)=>{setTime(e.target.value)}}/>
-        <input style={{width:"100%",backgroundColor:"#212121",color:"white",borderWidth:"0",fontSize:"25px"}}
-        type="date" value={date} onChange={(e)=>{setDate(e.target.value?e.target.value:today)}}/>
+    <Layout 
+    className='ContentLayout'>
+
+    <Skeleton 
+    style={{display:gettingCita?"":"none"}} 
+    loading 
+    active/>
+
+    <div 
+    style={{width:"100%", maxWidth:"800px", paddingTop:"15px", display:gettingCita?"none":"flex",
+    flexDirection:"column", paddingLeft:"10px", paddingRight:"10px", paddingBottom:"10px", borderRadius:"25px",
+    textAlign:"center", backgroundColor:"#212121", boxShadow:"0 5px 15px rgba(14,21,37,0.8)"}}>
+
+        <input 
+        style={{width:"100%",backgroundColor:"#212121",color:"white",borderWidth:"0",fontSize:"50px"}}
+        type="time" 
+        value={time} 
+        onChange={(e)=>{setTime(e.target.value)}}/>
+
+        <input 
+        style={{width:"100%",backgroundColor:"#212121",color:"white",borderWidth:"0",fontSize:"25px"}}
+        type="date" 
+        value={date} 
+        onChange={(e)=>{setDate(e.target.value?e.target.value:today)}}/>
+
     </div>
-    <div style={{marginTop:"20px",width:"100%",maxWidth:"800px",display:gettingCita?"none":""}}>
-        <Collapse accordion>
-            <Collapse.Panel header="Pacientes" key="1">
-                <List style={{backgroundColor:"whiteSmoke",paddingTop:"10px",paddingBottom:"10px"}}
-                    dataSource={Pacs} grid={grid} renderItem={(pacS) => (
-                        <TeraTaItem id={pacS.idPaciente} avatar={""} text={pacS.getShortName}/>
+
+    <div 
+    style={{marginTop:"20px",width:"100%",maxWidth:"800px",display:gettingCita?"none":""}}>
+
+        <Collapse 
+        accordion>
+
+            <Collapse.Panel 
+            header="Pacientes" 
+            key="1">
+
+                <List 
+                style={{backgroundColor:"whiteSmoke",paddingTop:"10px",paddingBottom:"10px"}}
+                dataSource={Pacs} 
+                grid={grid} 
+                renderItem={(pacS) => 
+                    (<TeraTaItem id={pacS.idPaciente} avatar={""} text={pacS.getShortName}/>
                 )}/>
-                <Button type="primary" shape="round" icon={<PlusOutlined/>} style={{width:"100%"}} 
+
+                <Button 
+                type="primary" 
+                shape="round" 
+                icon={<PlusOutlined/>} 
+                style={{width:"100%"}} 
                 onClick={()=>{setPicker(0); setShowSheet(true)}}>
                     Pacientes
                 </Button>
+
             </Collapse.Panel>
-            <Collapse.Panel header="Terapias" key="2">
-                <List style={{backgroundColor:"whiteSmoke",paddingTop:"10px",paddingBottom:"10px"}}
-                    dataSource={Teras} grid={grid} renderItem={(Tera) => (
-                        <TeraTaItem id={Tera.idTerapia} avatar={""} text={Tera.nombreTerapia} onClick={(id)=>{}}/>
-                )}/>
-                <Button type="primary" shape="round" icon={<PlusOutlined/>} style={{width:"100%"}} 
+
+            <Collapse.Panel 
+            header="Terapias" 
+            key="2">
+
+                <List 
+                style={{backgroundColor:"whiteSmoke",paddingTop:"10px",paddingBottom:"10px"}}
+                dataSource={Teras} 
+                grid={grid} 
+                renderItem={(Tera) => 
+                    (<TeraTaItem 
+                    id={Tera.idTerapia} 
+                    avatar={""} 
+                    text={Tera.nombreTerapia} 
+                    onClick={(id)=>{}}/>
+                    )}/>
+
+                <Button 
+                type="primary" 
+                shape="round" 
+                icon={<PlusOutlined/>} 
+                style={{width:"100%"}} 
                 onClick={()=>{setPicker(1); setShowSheet(true)}}>
                     Terapias
                 </Button>
+
             </Collapse.Panel>
-            <Collapse.Panel header="Terapeutas" key="3">
-                <List style={{backgroundColor:"whiteSmoke",paddingTop:"10px",paddingBottom:"10px"}}
-                    dataSource={TeraTas} grid={grid} renderItem={(Terata) => (
-                        <TeraTaItem id={Terata.dMasajista} avatar={""} text={getFirstWord(Terata.nombres)+" "+getFirstWord(Terata.apellidos)} onClick={(id)=>{}}/>
+
+            <Collapse.Panel 
+            header="Terapeutas" 
+            key="3">
+
+                <List 
+                style={{backgroundColor:"whiteSmoke",paddingTop:"10px",paddingBottom:"10px"}}
+                dataSource={TeraTas} 
+                grid={grid} 
+                renderItem={(Terata) => 
+                    (<TeraTaItem 
+                    id={Terata.dMasajista} 
+                    avatar={""} 
+                    text={getFirstWord(Terata.nombres)+" "+getFirstWord(Terata.apellidos)} 
+                    onClick={(id)=>{}}/>
                 )}/>
-                <Button type="primary" shape="round" icon={<PlusOutlined/>} style={{width:"100%"}} 
+
+                <Button 
+                type="primary" 
+                shape="round" 
+                icon={<PlusOutlined/>} 
+                style={{width:"100%"}} 
                 onClick={()=>{setPicker(2); setShowSheet(true)}}>
                     Terapeutas
                 </Button>
+
             </Collapse.Panel>
-            <Collapse.Panel header="Promociones" key="4">
-                <List style={{backgroundColor:"whiteSmoke",paddingTop:"10px",paddingBottom:"10px"}}
-                    dataSource={PromoS} grid={grid} renderItem={(Promo) => (
-                        <TeraTaItem id={Promo.idPromocion} avatar={""} text={Promo.nombrePromocion} onClick={(id)=>{}}/>
+
+            <Collapse.Panel 
+            header="Promociones" 
+            key="4">
+
+                <List 
+                style={{backgroundColor:"whiteSmoke",paddingTop:"10px",paddingBottom:"10px"}}
+                dataSource={PromoS} 
+                grid={grid} 
+                renderItem={(Promo) => 
+                    (<TeraTaItem 
+                    id={Promo.idPromocion} 
+                    avatar={""} 
+                    text={Promo.nombrePromocion} onClick={(id)=>{}}/>
                 )}/>
-                <Button type="primary" shape="round" icon={<PlusOutlined/>} style={{width:"100%"}} 
+
+                <Button 
+                type="primary" 
+                shape="round" 
+                icon={<PlusOutlined/>} style={{width:"100%"}} 
                 onClick={()=>{setPicker(3);setShowSheet(true)}}>
                     Promociones
                 </Button>
+
             </Collapse.Panel>
+
         </Collapse>
 
-        <Tabs activeKey={SucDom} onChange={(activeKey)=>{setSucDom(activeKey)}}>
-            <Tabs.TabPane tab={<span><EnvironmentFilled/> Sucursal </span>} key="0"><Space>
-                <MiniPicker visible={true} title={Sucur.nombreSucursal} icon={<EnvironmentFilled style={{fontSize:"50px",color:"white"}}/>} 
-                button="Cambiar Sucursal" onClick={()=>{setPicker(4);setShowSheet(true)}}/>
-                <MiniPicker visible={Sucur.idSucursal!=null? true:false} title={Cub.nombreHabitacion} icon={<LayoutFilled style={{fontSize:"50px",color:"white"}}/>} 
-                button="Cambiar Cubículo" onClick={()=>{setPicker(5);setShowSheet(true)}}/>
-            </Space></Tabs.TabPane>
-            <Tabs.TabPane tab={<span><CarFilled/> Domicilio</span>} key="1">
-                <Input.TextArea value={Direccion} onChange={(e)=>{setDireccion(e.target.value)}} maxLength={100} rows={4} placeholder="Direccion"></Input.TextArea>
+        <Tabs 
+        activeKey={SucDom} 
+        onChange={(activeKey)=>{setSucDom(activeKey)}}>
+
+            <Tabs.TabPane 
+            tab={<span><EnvironmentFilled/> Sucursal </span>} 
+            key="0">
+
+                <Space>
+                    <MiniPicker 
+                    visible={true} 
+                    title={Sucur.nombreSucursal} 
+                    icon={<EnvironmentFilled style={{fontSize:"50px",color:"white"}}/>} 
+                    button="Cambiar Sucursal" 
+                    onClick={()=>{setPicker(4);setShowSheet(true)}}/>
+
+                    <MiniPicker 
+                    visible={Sucur.idSucursal!=null? true:false} 
+                    title={Cub.nombreHabitacion} 
+                    icon={<LayoutFilled style={{fontSize:"50px",color:"white"}}/>} 
+                    button="Cambiar Cubículo" 
+                    onClick={()=>{setPicker(5);setShowSheet(true)}}/>
+
+                </Space>
+
             </Tabs.TabPane>
+
+            <Tabs.TabPane 
+            tab={<span><CarFilled/> Domicilio</span>} 
+            key="1">
+
+                <Input.TextArea 
+                value={Direccion} 
+                onChange={(e)=>{setDireccion(e.target.value)}} 
+                maxLength={100} 
+                rows={4} 
+                placeholder="Direccion"/>
+
+            </Tabs.TabPane>
+
         </Tabs>
-        <Button icon={ActionsProvider.isUpdt?<EditOutlined/>:<PlusOutlined/>} type='primary' 
-        style={{width:"100%",marginTop:"20px"}} size='large' loading={isLoading} shape='round' onClick={()=>{onFinish()}}>
-        {ActionsProvider.isUpdt? "Actualizar":"Añadir"}</Button>
+
+        <Button 
+        icon={ActionsProvider.isUpdt?<EditOutlined/>:<PlusOutlined/>}
+        type='primary' 
+        style={{width:"100%",marginTop:"20px"}} 
+        size='large' 
+        loading={isLoading} 
+        shape='round' 
+        onClick={()=>{onFinish()}}>
+            {ActionsProvider.isUpdt? "Actualizar":"Añadir"}
+        </Button>
+        
         <Divider/>
     </div>
     </Layout>

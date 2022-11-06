@@ -1,7 +1,6 @@
 import { Button, Divider, Form, Input, Layout,Menu,message,Typography } from "antd";
 import { BlockRead, ButtonSubmit, FormAvName, FormPageHeader, sectionStyle } from "../../../Utils/TextUtils";
 import React, {useState,useEffect} from 'react';
-import { Promocion } from "../../../Models/Models";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { getaction, ActionsProviders } from "../../../Utils/ActionsProviders";
 const { Title } = Typography;

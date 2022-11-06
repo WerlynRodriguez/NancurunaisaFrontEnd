@@ -1,5 +1,5 @@
 import "./Clock.css";
-import {Col,Row} from 'antd';
+import {Col,Row, Tooltip} from 'antd';
 import { useState } from "react";
 import day from "../resources/sunIcon.svg";
 import night from "../resources/moonIcon.svg";
@@ -44,13 +44,30 @@ export default function ClockShow(props){
     }
 
     return(
-        <Row className="clockPerfil" style={{marginTop:"10px",display:props.visible? "":"none"}}>
-            <Col span={5} className="DayNight" style={{backgroundImage:`url(${isday?day:night})`}} />
-            <Col span={18} style={{paddingTop:"5%", textAlign:"center"}}>
+        <Row 
+        className="clockPerfil" 
+        style={{marginTop:"10px",display:props.visible? "":"none"}}>
+
+            <Col 
+            span={4} 
+            className="DayNight" 
+            style={{backgroundImage:`url(${isday?day:night})`}} />
+
+            <Col 
+            span={18} 
+            style={{paddingTop:"5%", textAlign:"center"}}>
                 <h1> {display} </h1>
                 <h5> {sucur} </h5>
             </Col>
-            <Col span={1} style={{height:"100%",backgroundColor:color,borderBottomRightRadius:"25px",borderTopRightRadius:"25px"}}/>
+
+            {/* Dot indicates status of terapeuta */}
+            <Col 
+            span={2}
+            style={{display:"flex",alignItems:"center",justifyContent:"center"}}>
+                <Tooltip placement="topRight" title="Estado">
+                    <div style={{width:"10px",height:"60%",backgroundColor:color,borderRadius:"25px"}}/>
+                </Tooltip>
+            </Col>
         </Row>
     )
 }

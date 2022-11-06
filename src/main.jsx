@@ -42,6 +42,7 @@ import SucRep from './Personal/Reports/SucSRep';
 import AdUsers from './Personal/Perfil/Admin/AdUsers';
 import AdRols from './Personal/Perfil/Admin/AdRols';
 import UserDetail from './Personal/Perfil/Admin/UserDetail';
+import RolDetail from './Personal/Perfil/Admin/RolDetail';
 
 
 
@@ -124,7 +125,7 @@ function Nancurunaisa(){
             
             <Route path="Admin" element={<Outlet key="OutAdm"/>}>
               <Route path="Usuarios" element={<AdUsers/>}/>
-              <Route path="Usuario" element={<Outlet key="OutU"/>}>
+              <Route path="Usuario" element={<Outlet key="OutUser"/>}>
 
                 <Route path={FormActions.Add} element={<UserDetail key="UserAdd"/>}/>
                 <Route path={FormActions.Read+"/:idUS"} element={<UserDetail key="UserRead"/>}/>
@@ -132,6 +133,12 @@ function Nancurunaisa(){
               </Route>
 
               <Route path="Roles" element={<AdRols/>}/>
+              <Route path="Rol" element={<Outlet key="OutRol"/>}>
+
+                <Route path={FormActions.Add} element={<RolDetail key="RolAdd"/>}/>
+                <Route path={FormActions.Read+"/:idRol"} element={<RolDetail key="RolRead"/>}/>
+                <Route path={FormActions.Update+"/:idRol"} element={<RolDetail key="RolUpdt"/>}/>
+              </Route>
             </Route>
           </Route>
           <Route path='*' element={<Home key="HomeD"/>}/>

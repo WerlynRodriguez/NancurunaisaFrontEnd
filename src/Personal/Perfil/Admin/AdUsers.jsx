@@ -1,17 +1,12 @@
-import { CheckOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
-import { Button, Layout, List, message, PageHeader, Pagination, Typography } from "antd";
-import "../../../Utils/TextUtils.css";
-import { getFirstWord, MapSelectedItems } from '../../../Utils/TextUtils';
-import SelectedItem from '../../../Components/Items/SelectedItem';
-import Searchbar from "../../../Components/SearchBar";
-import MultiSelectList from "../../../Utils/MultiSelectList";
+import { useNavigate} from "react-router-dom";
 import React, {useState,useEffect} from 'react';
-import { useNavigate } from "react-router-dom";
+import PageList from '../../../Components/PageList';
 import { Item } from "../../../Models/Models";
-import { getByPag } from "../../../Utils/FetchingInfo";
-import { FormActions } from '../../../Utils/ActionsProviders';
-
-const { Title } = Typography;
+import { Menu, message } from "antd";
+import { FormActions } from "../../../Utils/ActionsProviders";
+import TerapeutaItem from "../../../Components/Items/TerapeutaItem";
+import { PlusOutlined } from "@ant-design/icons";
+import { ChangeStatus } from "../../../Utils/FetchingInfo";
 
 function getTitle(a,b){
   return a+" "+b;
@@ -19,188 +14,104 @@ function getTitle(a,b){
 
 export default function AdUsers(props){
   let Navigate = useNavigate();
-  const {picker, multi, data} = props;
+  const {picker, multi, dataPicked, onBack, onFinish} = props;
 
-  const [Items, setItems] = useState([]);
-  const [LoadingList,setLoadingList] = useState(true);
-  const perPageDefault = 6;
-  const [totalItems,setTotalItems] = useState(0);
+  const varsToFetch = (search) => {
+    //const filterActivo = Filters.Activo!="All"? `{activo:{eq:${Filters.Activo}}}`:"";
+    const filterActivo = "";
 
-  // Page * perPage = offset
-  var countItems = 0;
-  var search = "";
+    return {
+        table: "usuarios",
+        items: `idUsuario
+        nombres
+        apellidos
+        activo`,
+        searchQuery: `
+        and:[
+          {or:[
+            {nombres: {contains:"${search}"}}
+            {apellidos: {contains:"${search}"}}
+          ]},
+          ${filterActivo}
+        ]`,
+        orderQuery: "nombres: ASC"
+    }
+  }
 
-  //If is picker mode, the list can be initialized with data
-  const [MultiData,setMultiData] = useState(data? data:[]);
-
-  //If is multi picker mode, the multi selection is enabled automatically
-  const [selectionMode,setSelectionMode] = useState(multi?true:false);
-
-  useEffect(() => {
-    UsersGet()
-  }, [])
-
-  //======================================================================
-  // Get data from server, pagination + search + filter
-  //======================================================================
-  const UsersGet = () => {
-    setLoadingList(true);
-
-    const items = `idUsuario
-    nombres
-    apellidos`;
-
-    const searchQuery = `or:[
-      {nombres: {contains:"${search}"}}
-      {apellidos: {contains:"${search}"}}
-    ]`;
-
-    const orderQuery = `nombres: ASC`;
-    
-    getByPag("usuarios",items,countItems,perPageDefault,searchQuery,orderQuery).then((res)=>{
-      setTotalItems(res.totalCount);
-
-      const data = res.items.map((item)=>{
+  const adapter = (data) => {
+    return data.map((elemnt) => {
         return new Item(
-          item.idUsuario,
-          getTitle(item.nombres,item.apellidos),"","",
-          MultiData.find((sel)=>{
-            return sel.id==item.id
-          })? true:false)
-      });
-      setList(data);
-    }).catch((err)=>{
-      message.error("No se pudo cargar la lista de usuarios");
-      console.log(err);
-      setLoadingList(false);
-    });
+          elemnt.idUsuario,
+          [getTitle(elemnt.nombres,elemnt.apellidos)],
+          "",
+          elemnt.activo,
+          false,
+        );
+    })
   }
 
-  const setList = (result) =>{
-    setItems(result);
-    setLoadingList(false);
-  }
+  const changeStatusMD = (status,MultiData,setMultiData,setSelectionMode,setLoadingList,fetchData) => {
+    let ids = MultiData.map((item)=>{return item.id});
 
-  //======================================================================
-  // Deselect an item when is clicked from top list
-  //======================================================================
-  const desSelectItem =(id,index) =>{
-    setMultiData(MultiData.filter((item,indexF)=>indexF!=index));
-    let newArr = [...Items]; // copying the old datas array
-    newArr.map((item)=>{
-        if(item.id==id){
-            item.selected = false;
-        }
-    });
-
-    setItems(newArr);
-
-    if(MultiData.length == 1){
-        setMultiData([]);
+    setLoadingList(true);
+    ChangeStatus("Usuario","idUsuarios","["+ids+"]","activo",status,"idUsuario").then((response) => {
+      if (response != "errors") {
+        message.success("Usuarios actualizados correctamente",3);
         setSelectionMode(false);
+        setMultiData([]);
+        fetchData();
+      } else {
+        message.error("Error al actualizar los usuarios");
+        setLoadingList(false);
+      }
+  });
+  }
+
+  const itemsMenu = [
+    {key:"Act",label:"Activar"},
+    {key:"Des",label:"Desactivar"},
+  ];
+
+  const onClickItemMenu = (key,MultiData,setMultiData,setSelectionMode,setLoadingList,fetchData) => {
+    switch (key) {
+      case "Act":
+        changeStatusMD(false,MultiData,setMultiData,setSelectionMode,setLoadingList,fetchData);
+        break;
+      case "Des":
+        changeStatusMD(true,MultiData,setMultiData,setSelectionMode,setLoadingList,fetchData);
+        break;
+      default:
+        break;
     }
   }
 
-  const onBack=()=>{
-    if(picker){
-        if (typeof props.onBack === "function") {
-            props.onBack();
-        }
-    }else{
-        Navigate(-1);
-    }
-  }
-    
-  const onSearch = (value) =>{
-    search = value;
-    countItems = 0;
-    UsersGet();
-  }
+  const tools = [
+    {icon:<PlusOutlined/>,onClick:()=>{Navigate("/Personal/Ajustes/Admin/Usuario/"+FormActions.Add)}}
+  ];
 
-  const onChangePage = (page) =>{
-    countItems = (page-1)*perPageDefault;
-    UsersGet();
-  }
-
-  const onClickAddUser=()=>{
-    Navigate("/Personal/Ajustes/Admin/Usuario/"+FormActions.Add);
+  const onClickItem = (item) => {
+    Navigate("/Personal/Ajustes/Admin/Usuario/"+FormActions.Update+"/"+item.id);
   }
 
   return(
-    <Layout>
-      <PageHeader 
-      className="TopTittle" 
-      ghost={false} 
-      onBack={()=>{onBack()}} 
-      title={
+  <PageList
+    title="Usuarios"
+    varsToFetch={(search) => varsToFetch(search)}
+    adapter={(data) => adapter(data)}
+    itemsMenu={itemsMenu}
+    onClickItemMenu={onClickItemMenu}
+    renderItem={(item,index,onclick,onLongPress,selectionMode) => (
 
-      <Title level={2}>
-        Usuarios
-      </Title>}
-      extra={<>
-
-        <Button 
-        style={{display:selectionMode && !picker?"":"none"}} 
-        shape="circle" 
-        size='large' 
-        onClick={()=>{/*This will be Delete */}} 
-        icon={<DeleteOutlined/>}/>
-      </>}>
-          
-          <MapSelectedItems 
-          data={MultiData} 
-          item={(item,index)=>(
-
-            <SelectedItem 
-            key={index}
-            index={index}
-            item={item} 
-            onClick={(id,index)=>{desSelectItem(id,index)}} 
-            />)}
-          />
-      </PageHeader>
-
-      <button 
-      className='BottomRoundButton' 
-      onClick={()=>{onClickAddUser()}} 
-      style={{display:picker?"none":""}}>
-        <PlusOutlined/>
-      </button>
-
-      <button 
-      className='BottomRoundButton' 
-      onClick={()=>{props.onFinish(MultiData)}} 
-      style={{display:selectionMode && multi?"":"none"}}>
-        <CheckOutlined/>
-      </button>
-
-      <Layout className='ContentLayout'>
-        <Searchbar 
-        onSearch={(value)=>{onSearch(value)}} 
-        loading={LoadingList}/>
-
-        <Pagination 
-        onChange={(page)=>{onChangePage(page)}} 
-        defaultPageSize={perPageDefault} 
-        total={totalItems} 
-        style={{marginTop:"20px"}}/>
-
-        <MultiSelectList
-        items={Items}
-        setItems={(v)=>{setItems(v)}}
-        loading={LoadingList}
-        selectionMode={selectionMode}
-        setSelectionMode={(v)=>{setSelectionMode(v)}}
-        multiData={MultiData}
-        setMultiData={(v)=>{setMultiData(v)}}
-        onClick={(item)=>{Navigate("/Personal/Ajustes/Admin/Usuario/"+FormActions.Update+"/"+item.id)}}
-        pickerMode={({
-          picker:picker,
-          multi:multi,
-          onFinish:(items)=>{console.log("Finish Picker Mode")}
-        })}
-        />
-      </Layout>
-    </Layout>
+      <TerapeutaItem
+      key={index}
+      item={item}
+      onClick={(item) => onclick(item,index,onClickItem)}
+      onLongPress={(item) => onLongPress(item,index)}
+      selectionMode={selectionMode}
+      />
+    )}
+    tools={tools}
+    pickerSettings={props}
+  />
   )
 }

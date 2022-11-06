@@ -4,7 +4,6 @@ import Searchbar from "../../../Components/SearchBar";
 import ItemView from '../../../Components/Items/TerapeutaItem';
 import { useNavigate} from "react-router-dom";
 import React, {useState,useEffect} from 'react';
-import { Promocion } from "../../../Models/Models";
 import { CheckOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { MapSelectedItems } from "../../../Utils/TextUtils";
 import { FormActions } from "../../../Utils/ActionsProviders";

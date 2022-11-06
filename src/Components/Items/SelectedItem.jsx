@@ -22,10 +22,10 @@ export default function selectedItem(props){
         <Avatar 
         size="large" 
         src={item.pic? item.pic:null}>
-            {item.pic? null:item.title[0]}
+            {item.pic? null:item.info[0][0]}
         </Avatar>
 
-        {get6text(item.title)}
+        {get6text(item.info[0])}
     </div>
   </Space>)
 }

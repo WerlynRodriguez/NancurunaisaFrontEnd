@@ -4,7 +4,6 @@ import React, {useState,useEffect} from 'react';
 import SelectedItem from '../../../Components/Items/SelectedItem';
 import ItemView from "../../../Components/Items/TerapeutaItem";
 import Searchbar from "../../../Components/SearchBar";
-import { Habitacion } from "../../../Models/Models";
 import { CheckOutlined, DeleteOutlined } from "@ant-design/icons";
 const { Title } = Typography;
 

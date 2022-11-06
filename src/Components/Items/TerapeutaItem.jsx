@@ -1,91 +1,83 @@
 import "./TeraTaItem.css";
-import {Row,Col,Avatar, Badge, Checkbox, Space} from "antd";
-import React, {useCallback, useEffect, useMemo, useRef} from 'react';
+import {Row,Col,Avatar, Badge, Typography, Checkbox, Space} from "antd";
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import { CheckCircleFilled } from "@ant-design/icons";
 
-function useLongPress({
-    onClick = () => {},
-    onLongPress = () => {},
-    ms = 300,
-  } = {}) {
-    const timerRef = useRef(false);
-    const eventRef = useRef({});
-  
-    const callback = useCallback(() => {
-      onLongPress(eventRef.current);
-      eventRef.current = {};
-      timerRef.current = false;
-    }, [onLongPress]);
-  
-    const start = useCallback(
-      (ev) => {
-        ev.persist();
-        eventRef.current = ev;
-        timerRef.current = setTimeout(callback, ms);
-      },
-      [callback, ms]
-    );
-  
-    const stop = useCallback(
-      (ev) => {
-        ev.persist();
-        eventRef.current = ev;
-        if (timerRef.current) {
-          clearTimeout(timerRef.current);
-          onClick(eventRef.current);
-          timerRef.current = false;
-          eventRef.current = {};
-        }
-      },
-      [onClick]
-    );
-  
-    return useMemo(
-      () => ({
-        onMouseDown: start,
-        onMouseUp: stop,
-        onMouseLeave: stop,
-        onTouchStart: start,
-        onTouchEnd: stop,
-      }),
-      [start, stop]
-    );
-  }
+const { Title, Text } = Typography;
 
-export default function TeraTaItem(props){
-    let {item,onClick,onLongPress,mulSelMode} = props;
+function useLongPress(callback = () => {}, ms = 300) {
+  const [startLongPress, setStartLongPress] = useState(false);
 
-    // Validate if the variable is a function, if true, execute it
-    const ejectFunction = (func) => {
-        if (typeof func === 'function') {
-            func(item);
-        }
+  useEffect(() => {
+    let timerId;
+    if (startLongPress) {
+      timerId = setTimeout(callback, ms);
+    } else {
+      clearTimeout(timerId);
     }
 
-    const longPressProps = useLongPress({
-        onClick: (ev) => ejectFunction(onClick),
-        onLongPress: (ev) => ejectFunction(onLongPress),
-      });
+    return () => {
+      clearTimeout(timerId);
+    };
+  }, [callback, ms, startLongPress]);
 
-    return (<div style={{width:"100%",display:"flex",flexDirection:"row"}}>
-    <div style={{width:"10%",display:mulSelMode?"flex":"none",flexDirection:"column",justifyContent:"center",alignItems:"center"}}>
-        <Checkbox 
-        checked={item.selected} 
-        onChange={()=>{ejectFunction(onClick)}}/>
-    </div>
+  const start = useCallback(() => {
+    setStartLongPress(true);
+  }, []);
+  const stop = useCallback(() => {
+    setStartLongPress(false);
+  }, []);
 
-    <Row {...longPressProps} className="ItemTera">
-        <Col className="ColCardIcon" span={6}>
+  return {
+    onMouseDown: start,
+    onMouseUp: stop,
+    onMouseLeave: stop,
+    onTouchStart: start,
+    onTouchEnd: stop,
+  };
+}
 
-            <Avatar 
-            size="large" 
-            src={item.pic? item.pic:null}>
-                {item.pic? null:item.title[0]}
-            </Avatar>
+export default function TerapeutaItem(props){
+    let {
+      item,
+      onClick,
+      onLongPress,
+      mulSelMode} = props;
+
+    const useLP = useLongPress(() => {onLongPress(item)}, 800);
+
+    return (
+      <Row
+      {...useLP}
+      onClick={()=>{onClick(item)}}
+      className="comunItem"
+      style={{backgroundColor: item.selected? "rgba(89,32,133, 0.2)": "white"}}>
+
+        <Col span={item.selected? 2 : 0} 
+        style={{textAlign:"center"}}>
+          <CheckCircleFilled style={{fontSize:"20px"}}/>
         </Col>
-        <Col span={2}/>
-        <Col span={16}>
-            {item.title}
+        
+        <Col span={4} style={{textAlign:"center"}}>
+          <Avatar
+          size="large"
+          src={item.pic}>
+            {item.pic? null:item.info[0][0]}
+          </Avatar>
         </Col>
-    </Row>
-    </div>);
+
+        <Col span={item.selected ? 16 : 18}>
+          <Title style={{fontSize:16,margin:0,padding:0}}>
+            {item.info[0]}
+          </Title>
+          <Text style={{fontSize:12}}>
+            {item.info[1]}
+          </Text>
+        </Col>
+
+        <Col span={2}>
+          <Badge status={item.status? "success":"error"} />
+        </Col>
+      </Row>
+    )
 }

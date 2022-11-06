@@ -11,14 +11,30 @@ export default function LogInForm(){
   const [isLoading,setloading]= useState(false);
   let Navigate = useNavigate();
 
+  const NO_API_MODE = false;
+
   const onFinish = () =>{
     if(isLoading) { return; }
     setloading(true);
+
+    if (NO_API_MODE){
+      localStorage.setItem('user', "JSON.stringify(user)");
+      localStorage.setItem('accessToken', "token");
+      
+      setloading(false);
+      Navigate("/Personal/Home");
+      return;
+    }
     
     //--------------------------------
     // Send request to server to login
     //--------------------------------
     loginUserGQL(form.getFieldValue("username"),form.getFieldValue("password")).then((result)=>{
+      if (result == "errors") { 
+        setloading(false);
+        return;
+      }
+
       let token = result.data.authentication.token.token;
       message.success("Bienvenido",1).then(() =>{
         
@@ -31,16 +47,6 @@ export default function LogInForm(){
         setloading(false);
         Navigate("/Personal/Home");
       });
-    }).catch((error) => {
-      const newError = new Error(error);
-      let mensaje = "La contraseña o correo son incorrectos";
-      
-      if(newError.message.split(":")[1] === " Failed to fetch"){
-        mensaje = "No se pudo conectar con el servidor";
-      }
-
-      message.error(mensaje,3);
-      setloading(false);
     });
   }
 

@@ -107,13 +107,68 @@
     background-size: 50%;
 }
 
+.ToolBar{
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    bottom: 0;
+    right: 0;
+    z-index: 10;
+    width: 60px;
+    height: auto;
+    margin-right: 20px;
+    margin-bottom: 100px;
+    padding-top: 20px;
+    padding-bottom: 60px;
+    background-color: var(--bgNav);
+    border-radius: 50px;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+    transition: all 0.5s ease-in-out;
+}
+
+.ToolBarCol{
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    z-index: 10;
+    width: 60px;
+    height: 60px;
+    margin-right: 20px;
+    margin-bottom: 100px;
+    padding-top: 20px;
+    background-color: var(--bgNav);
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+    border-radius: 50px;
+    transition: all 0.5s ease-in-out;
+}
+
+.ToolBar .TBbuttons{
+    border-radius: 50%;
+    border:none;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    margin-bottom: 10px;
+    background: white;
+    color: black;
+    transition: all 0.5s ease-in-out;
+}
+
+.ToolBarCol .TBbuttons{
+    display: none;
+    transition: all 0.5s ease-in-out;
+}
+
 .BottomRoundButton{
     position: fixed;
     bottom: 0;
     right: 0;
     border-radius: 50px;
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     margin-right: 20px;
     margin-bottom: 100px;
     font-size: 20px;
@@ -122,8 +177,7 @@
     background: var(--bgNav);
     border: 1px solid #e8e8e8;
     transition: all .3s;
-    box-shadow: 6px 6px 12px #c5c5c5,
-                -6px -6px 12px #ffffff;
+    box-shadow: 0px -6px 12px #c5c5c5;
 }
 
 .BottomRoundButton:hover {border: 2px solid var(--focusColor)}

@@ -4,18 +4,18 @@ import { Modal, Button } from 'antd';
 import { useNavigate} from "react-router-dom";
 
 export default function Logoutbutton(){
-    const [visible, setVisible] = useState(false);
+    const [open, setOpen] = useState(false);
     const [confirmLoading, setConfirmLoading] = useState(false);
     let Navigate = useNavigate();
 
     const showModal = () => {
-        setVisible(true);
+        setOpen(true);
       };
     
       const handleOk = () => {
         setConfirmLoading(true);
         setTimeout(() => {
-            setVisible(false);
+            setOpen(false);
             setConfirmLoading(false);
             localStorage.removeItem("accessToken");
             localStorage.removeItem("user");
@@ -24,20 +24,40 @@ export default function Logoutbutton(){
       };
     
       const handleCancel = () => {
-        setVisible(false);
+        setOpen(false);
       };
 
-    return([
-        <button key="logout" onClick={showModal} className="Logout">Cerrar Sesión</button>,
-        <Modal key="logoutModal" centered title="Cerrar Sesión" visible={visible} onOk={()=>handleOk} onCancel={()=>handleCancel}
+    return(<>
+        <button 
+        key="logout" 
+        onClick={showModal} 
+        className="Logout">
+          Cerrar Sesión
+        </button>
+
+        <Modal 
+        key="logoutModal" 
+        centered 
+        title="Cerrar Sesión" 
+        open={open} 
+        onOk={handleOk} 
+        onCancel={handleCancel}
             footer={[
-                <Button key="back" onClick={handleCancel}>
+                <Button 
+                key="back" 
+                onClick={handleCancel}>
                   Cancelar
                 </Button>,
-                <Button key="submit" type="primary" loading={confirmLoading} danger onClick={handleOk}>
+                
+                <Button 
+                key="submit" 
+                type="primary" 
+                loading={confirmLoading} 
+                danger 
+                onClick={handleOk}>
                   Cerrar Sesión
                 </Button>]}>
-        <p>¿Está seguro de cerrar sesión?</p> </Modal>
-        ]
-    )
+        <p>¿Está seguro de cerrar sesión?</p> 
+        </Modal>
+      </>)
 }

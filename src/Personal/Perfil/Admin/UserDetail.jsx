@@ -26,7 +26,7 @@ export default function UserDetail() {
     const [isLoading,setloading]= useState(false);
     const [form] = Form.useForm();
 
-    const [user,setUser] = useState([]);
+    const [user, setUser] = useState([]);
 
     useEffect(() => {
         if(ActionsProvider.isAdd){ return; }
@@ -50,6 +50,8 @@ export default function UserDetail() {
         activo`;
 
         getById("usuarios","idUsuario",idUS,items).then((response) => {
+            if (response == "errors") return;
+
             setUser(response.items[0]);
             form.setFieldsValue({
                 nombres: response.items[0].nombres,
@@ -59,10 +61,7 @@ export default function UserDetail() {
                 numCel: response.items[0].numCel,
                 email: response.items[0].email,
             });
-        }).catch((error) => {
-            message.error("Error al cargar los datos");
-            console.log(error);
-        }).finally(() => {
+
             setLoading(false);
         });
     }
@@ -134,7 +133,7 @@ export default function UserDetail() {
 
     const ChangeStatusUser = () => {
         setLoading(true);
-        ChangeStatus("Usuario","idUsuario",idUS,"activo",user.activo).then((response) => {
+        ChangeStatus("Usuario","idUsuarios",idUS,"activo",user.activo,"idUsuario").then((response) => {
             if (response.actualizarEstadoUsuario != null) {
                 message.success("Usuario "+(user.activo?"deshabilitado":"habilitado") +" correctamente",2).then(() => {
                     FetchData();
@@ -162,9 +161,6 @@ export default function UserDetail() {
     );
 
     return (<div>
-        <BlockRead
-        Show={ActionsProvider.isRead}/>
-
         <FormPageHeader 
         ActionProv={ActionsProvider} 
         Text="Usuarios" 
@@ -177,15 +173,15 @@ export default function UserDetail() {
         <FormAvName
         ActionProv={ActionsProvider} 
         Loading={Loading} 
-        Avatar={""} 
-        Text={user.nombres+" "+user.apellidos}
-        SubTitle={"Usuario actualmente " + (user.activo?"Habilitado":"Deshabilitado")}/>
+        Pic="https://source.unsplash.com/random/800x600"
+        Text={user.nombres+" "+user.apellidos}/>
         
         <Layout
         className='ContentLayout' 
         style={{display:Loading ? "None":""}}>
             
             <Form 
+            disabled={ActionsProvider.isRead}
             onFinish={()=>{onFinish()}} 
             onFinishFailed={(e)=>{form.scrollToField(e.errorFields[0].name)}}
             form={form} 
@@ -194,19 +190,30 @@ export default function UserDetail() {
                 
                 <div style={sectionStyle}>
                     <Title level={4}>Información Personal</Title>
-                    <Form.Item name="nombres" label="Nombres:" rules={[
-                    {validator: (_, value) => ValDoubleName(value,"nombres")}]}>
-                        <Input type="text" maxLength={30} placeholder='Nombres'/>
+                    <Form.Item 
+                    name="nombres" 
+                    label="Nombres:" rules={[{validator: (_, value) => ValDoubleName(value,"nombres")}]}>
+                        <Input 
+                        type="text" 
+                        maxLength={30} 
+                        placeholder='Nombres'/>
                     </Form.Item>
 
                     <Divider/>
-                    <Form.Item name="apellidos" label="Apellidos:" rules={[
-                    {validator: (_, value) => ValDoubleName(value,"apellidos")}]}>
-                        <Input placeholder='Apellidos'/>
+                    <Form.Item 
+                    name="apellidos" 
+                    label="Apellidos:" 
+                    rules={[{validator: (_, value) => ValDoubleName(value,"apellidos")}]}>
+                        <Input 
+                        type="text"
+                        placeholder='Apellidos'/>
                     </Form.Item>
 
                     <Divider/>
-                    <Form.Item name="sexo" label="Género:" rules={[{required:true,message:"¡Seleccione el género!"}]}>
+                    <Form.Item 
+                    name="sexo" 
+                    label="Género:" 
+                    rules={[{required:true,message:"¡Seleccione el género!"}]}>
                         <Select>
                             <Select.Option value="M">Masculino</Select.Option>
                             <Select.Option value="F">Femenino</Select.Option>
@@ -225,10 +232,11 @@ export default function UserDetail() {
                     <Title level={4}>Información de Contacto</Title>
                     <Form.Item name="numCel" label="Numero Telefónico:" rules={[{
                         required: true, message: 'Introduzca el número Celular!'}]}>
-                        <PhoneInput/>
+                        <PhoneInput disabled={ActionsProvider.isRead} placeholder="Numero de Celular"/>
                     </Form.Item>
 
                     <Divider/>
+                    
                     <Form.Item name="email" label="Correo Electrónico:" 
                     rules={[{
                         type: 'email',message: '¡No es un correo Válido!',},

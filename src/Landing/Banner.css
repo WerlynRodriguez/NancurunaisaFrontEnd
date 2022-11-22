@@ -1,11 +1,12 @@
 @import "../../node_modules/antd/dist/antd.css";
 
-.Image{
+.Banner{
     width: 100%;/*Horizontal*/
     height: 500px;/*Vertical*/
     background-size:cover;
-    background-image: url("../resources/sunrise.jpg");
     background-position: center;
+
+    /*Fade from bottom to top white color*/
 
     display:flex;
     flex-direction: column;

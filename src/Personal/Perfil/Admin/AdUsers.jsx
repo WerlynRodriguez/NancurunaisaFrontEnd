@@ -25,7 +25,13 @@ export default function AdUsers(props){
         items: `idUsuario
         nombres
         apellidos
-        activo`,
+        activo
+        idRol{
+          nombreRol
+        }
+        terapeuta{
+          idTerapeuta
+        }`,
         searchQuery: `
         and:[
           {or:[
@@ -38,31 +44,32 @@ export default function AdUsers(props){
     }
   }
 
-  const adapter = (data) => {
+  const adapter = (data,multidata) => {
     return data.map((elemnt) => {
         return new Item(
           elemnt.idUsuario,
-          [getTitle(elemnt.nombres,elemnt.apellidos)],
+          [getTitle(elemnt.nombres,elemnt.apellidos),
+          elemnt.idRol[0] ? elemnt.idRol[0].nombreRol : "Sin rol",
+          elemnt.terapeuta],
           "",
           elemnt.activo,
-          false,
-        );
+          multidata.find((item) => item.id == elemnt.idUsuario));
     })
   }
 
-  const changeStatusMD = (status,MultiData,setMultiData,setSelectionMode,setLoadingList,fetchData) => {
-    let ids = MultiData.map((item)=>{return item.id});
+  const changeStatusMD = (status,info) => {
+    let ids = info.MultiData.map((item)=>{return item.id});
 
-    setLoadingList(true);
+    info.setLoadingList(true);
     ChangeStatus("Usuario","idUsuarios","["+ids+"]","activo",status,"idUsuario").then((response) => {
       if (response != "errors") {
         message.success("Usuarios actualizados correctamente",3);
-        setSelectionMode(false);
-        setMultiData([]);
-        fetchData();
+        info.setSelectionMode(false);
+        info.setMultiData([]);
+        info.fetchData();
       } else {
         message.error("Error al actualizar los usuarios");
-        setLoadingList(false);
+        info.setLoadingList(false);
       }
   });
   }
@@ -72,13 +79,13 @@ export default function AdUsers(props){
     {key:"Des",label:"Desactivar"},
   ];
 
-  const onClickItemMenu = (key,MultiData,setMultiData,setSelectionMode,setLoadingList,fetchData) => {
+  const onClickItemMenu = (key,info) => {
     switch (key) {
       case "Act":
-        changeStatusMD(false,MultiData,setMultiData,setSelectionMode,setLoadingList,fetchData);
+        changeStatusMD(false,info);
         break;
       case "Des":
-        changeStatusMD(true,MultiData,setMultiData,setSelectionMode,setLoadingList,fetchData);
+        changeStatusMD(true,info);
         break;
       default:
         break;
@@ -97,7 +104,7 @@ export default function AdUsers(props){
   <PageList
     title="Usuarios"
     varsToFetch={(search) => varsToFetch(search)}
-    adapter={(data) => adapter(data)}
+    adapter={adapter}
     itemsMenu={itemsMenu}
     onClickItemMenu={onClickItemMenu}
     renderItem={(item,index,onclick,onLongPress,selectionMode) => (

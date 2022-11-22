@@ -1,4 +1,4 @@
-import { BarsOutlined, CloseOutlined, PlusOutlined } from "@ant-design/icons";
+import { BarsOutlined, CloseOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import "../Utils/TextUtils.css";
 
@@ -9,7 +9,7 @@ export default function ToolBar(props){
     if (!tools) return null;
 
     return (
-        <div className={collapsed?"ToolBarCol":"ToolBar"}>
+        <div className={collapsed ? "ToolBarCol":"ToolBar"}>
             <button 
             className='BottomRoundButton' 
             onClick={()=>{setCollapsed((v)=>setCollapsed(!v))}}>

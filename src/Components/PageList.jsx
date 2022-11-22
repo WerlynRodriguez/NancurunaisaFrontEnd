@@ -8,7 +8,7 @@ import React, {useState,useEffect} from 'react';
 import { useNavigate } from "react-router-dom";
 import { getByPag } from "../Utils/FetchingInfo";
 import { FormActions } from '../Utils/ActionsProviders';
-import { BottomSheet } from "react-spring-bottom-sheet";
+//import { BottomSheet } from "react-spring-bottom-sheet";
 
 import "../Utils/TextUtils.css";
 import ToolBar from "./ToolBar";
@@ -38,16 +38,18 @@ export default function PageList(props){
     var countItems = 0;
     var search = "";
 
-    const [MultiData,setMultiData] = useState(dataPicked?dataPicked:[]);
+    const [MultiData,setMultiData] = useState(dataPicked ? dataPicked : []);
 
     //If is multi picker mode, the multi selection is enabled automatically
-    const [selectionMode,setSelectionMode] = useState(multi?true:false);
+    const [selectionMode,setSelectionMode] = useState(multi ? true : false);
 
     const [showFilter,setShowFilter] = useState(false);
 
+    // This menu is used when the user is in multi selection mode, 
+    // and the user can select the action to do with the selected items
     const menuItems = !itemsMenu? [] : itemsMenu.map((item) => {
         return {key: item.key, label: item.label, onClick: () => {
-            onClickItemMenu(item.key,MultiData,setMultiData,setSelectionMode,setLoadingList,fetchData);
+            onClickItemMenu(item.key,{MultiData,setMultiData,setSelectionMode,setLoadingList,fetchData});
         }}
     });
 
@@ -56,7 +58,7 @@ export default function PageList(props){
         style={{width:"200px",borderRadius:"15px"}}
         items={menuItems}
         />
-      );
+    );
 
     useEffect(() => {
         fetchData();
@@ -74,14 +76,14 @@ export default function PageList(props){
         .then((res) => {
             if (res=="errors") return;
 
-            setItems(adapter(res.items));
+            setItems(adapter(res.items,MultiData));
             setTotalItems(res.totalCount);
             setLoadingList(false);
         });
     }
 
     const GoBack = () => {
-        if (picker){
+        if (picker || onBack){
             onBack();
         }else{
             Navigate(-1);
@@ -99,11 +101,12 @@ export default function PageList(props){
     
         setItems(newArr);
     
-        if(MultiData.length == 1){
-            setMultiData([]);
+        if (MultiData.length != 1) return;
+        setMultiData([]);
+        
+        if (!multi)
             setSelectionMode(false);
-        }
-      }
+    }
 
     return (<Layout>
         
@@ -112,8 +115,8 @@ export default function PageList(props){
         onBack={GoBack} 
         title={
 
-        <Title level={2}>
-            {title}
+        <Title level={selectionMode ? 4 : 2 }>
+            {selectionMode ? "Seleccionando " + MultiData.length + " "+title : title}
         </Title>}
 
         extra={<>
@@ -126,7 +129,7 @@ export default function PageList(props){
 
             <DropdownMenu
             key="1"
-            active={selectionMode}
+            active={selectionMode && !picker}
             menu={userMenu}/>
         </>}
         >
@@ -144,16 +147,22 @@ export default function PageList(props){
             />
         </PageHeader>
 
-        <ToolBar
-        tools={tools}/>
+        <ToolBar tools={picker ? null : tools}/>
+
+        <button 
+        className='BottomRoundButton'
+        style={{display: multi ? "" : "none"}}
+        onClick={() => {onFinish(MultiData)}}>
+            <CheckOutlined />
+        </button>
 
         <Layout className='ContentLayout'>
             <Searchbar 
-            onSearch={(value)=>{onSearch(value)}} 
+            onSearch={(value)=>{search = value; fetchData();}} 
             loading={LoadingList}/>
 
             <Pagination 
-            onChange={(page)=>{onChangePage(page)}} 
+            onChange={(page)=>{countItems = (page-1)*perPageDefault; fetchData();}} 
             defaultPageSize={perPageDefault} 
             total={totalItems} 
             style={{marginTop:"20px"}}/>
@@ -168,7 +177,7 @@ export default function PageList(props){
             multiData={MultiData}
             setMultiData={(v)=>{setMultiData(v)}}
             pickerSettings={pickerSettings}
-        />
+            />
       </Layout>
 
     </Layout>);

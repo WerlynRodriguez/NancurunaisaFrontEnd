@@ -9,24 +9,23 @@ import { useEffect, useState } from "react";
 import moment from 'moment';/*What Day is? */
 import { DeleteOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import { AFP, AFPStrings, AnamAStrings, APNP, APNPStrings, APP, APPStrings } from "../../../Utils/Anamnesis";
+import { ChangeStatus, Create, getById, Update } from "../../../Utils/FetchingInfo";
+import { Paciente } from "../../../Models/Models";
+import { RangeProvider } from "../../../Utils/RangeProviders";
 
 const {Title} = Typography
 
 export default function PacSDetail(){
     let Navigate = useNavigate();
     const local = useLocation();/* What is my url */
-    const ActionsProvider = new ActionsProviders(getaction(local.pathname));/*Actions crud*/
+    const ActionsProvider = new ActionsProviders(getaction(local.pathname,4));/*Actions crud*/
     const {idPA} = useParams(); /* Params react Router fron now what is the id to want a action */
 
-    const [Loading,setLoading] = useState(idPA==null? false:true);/*Fetching terapeuta info */
-    const [isLoading,setloading]= useState(false);/*For Add teratas */
+    const [Loading,setLoading] = useState(idPA==null? false:true);/*Fetching paciente info */
+    const [isLoading,setloading]= useState(false);/*For Add paciente */
     const [form] = Form.useForm();
-    const [SelectedAFP,setSelectedAFP] = useState([0,8]);
-    const [SelectedAPNP, setSelectedAPNP] = useState([3]);
-    const [SelectedAPP,setSelectedAPP] = useState([1]);
-    const [isWorking,setisWorking] = useState(false);
 
-    const [Pac,setPac] = useState([]);/* All terapeuta info after fetching */
+    const [Pac,setPac] = useState(new Paciente(null));
 
     useEffect(() => {
         if (ActionsProvider.isAdd) { return; }
@@ -34,82 +33,101 @@ export default function PacSDetail(){
     },[])
 
     const PacGet = () =>{
-        // GetByIdPac(idPA).then((result)=>{
-        //     setLoading(false);
-        //     setPac(result);
-        //     //setisWorking();
-        //     form.resetFields();
-        // }).catch((err)=>{
-        //     setLoading(false);
-        //     message.error(err);
-        // })
+        setLoading(true);
+        const items = 
+        `idPaciente
+        nombres
+        apellidos
+        sexo
+        nacionalidad
+        profesionOficio
+        horasTrabajo
+        numCel
+        fechaNacimiento
+        escolaridad
+        estadoCivil
+        direccion
+        activo`;
+
+        const rangeProviders = new RangeProvider();
+        rangeProviders.loadPermisos(() => {
+            if (!rangeProviders.verifyPermiso("Ver","Pacientes")) Navigate("/Personal/Clinica");
+
+            getById("paciente","idPaciente",idPA,items).then((response) => {
+                if (response == "errors") return;
+
+                let paciente = new Paciente(response.data.paciente.items[0]);
+                setPac(paciente);
+
+                form.setFieldsValue({
+                    nombres: paciente.nombres,
+                    apellidos: paciente.apellidos,
+                    sexo: paciente.sexo,
+                    nacionalidad: paciente.nacionalidad,
+                    profesionOficio: paciente.profesionOficio,
+                    horasTrabajo: paciente.horasTrabajo,
+                    numCel: paciente.numCel,
+                    fechaNacimiento: paciente.fechaNacimiento,
+                    escolaridad: paciente.escolaridad,
+                    estadoCivil: paciente.estadoCivil,
+                    direccion: paciente.direccion,
+                    activo: paciente.activo,
+                });
+                setLoading(false);
+                setloading(false);
+            });
+        });
     }
 
     const onFinish=()=>{
         setloading(true);
         if (ActionsProvider.isAdd) {
-            var data = {
-                "nombres": form.getFieldValue("Nombres"),
-                "apellidos": form.getFieldValue("Apellidos"),
-                "sexo": form.getFieldValue("Gender"),
-                "edad": 47,
-                "nacionalidad": form.getFieldValue("Country"),
-                "profesion_oficio": "Systems Administrator I",
-                "horas_trabajo": 6,
-                "numCel": form.getFieldValue("Phone"),
-                "fecha_nacimiento": moment(form.getFieldValue("Birth")).format("YYYY-MM-DD"),
-                "amnanesis": []
-            }
-            // CreatePac(data).then((result)=>{
-            //     message.success("Paciente Añadido",1).then(()=>{
-            //     setloading(false);
-            //     Navigate(-1);})
-            // }).catch((err)=>{
-            //     setloading(false);
-            //     message.error(err);
-            // })
+            PacAdd();
         }else{
-            var data = {'id':idPA,"fname": form.getFieldValue("Nombres")}
-            // UpdatePac(data).then((result)=>{
-            //     if (result['status'] === 'ok'){
-            //         message.success("Paciente Modificado",1).then(()=>{
-            //         setloading(false);
-            //         Navigate(-1);
-            //       })
-            //     }else{message.error("No se pudo Modificar",2);setloading(false);}
-            //   })
+            PacUpdate();
         }
     }
 
-    const deletePac =()=>{
-        var data = {'id':idPA}
-            // DeletePac(data).then((result)=>{
-            // if (result['status'] === 'ok'){
-            //     message.success("Paciente Eliminado",1).then(()=>{
-            //     setloading(false);
-            //     Navigate(-1);
-            //     })
-            // }else{message.error("No se pudo Eliminar",2);setloading(false);}
-            // })
+    const PacAdd = () => {
+        const vars = Pac.toString(form.getFieldsValue());
+        Create("Paciente","pacienteInput",vars,"idPaciente").then((response) => {
+            if (response == "errors") { setloading(false); return; }
+
+            message.success("Paciente agregado",1,() => {
+                Navigate("/Personal/Clinica/Pacientes");
+            });
+        });
     }
 
-    const userMenu = (
-    <Menu style={{width:"200px",borderRadius:"20px"}}>
-        <Menu.Item key="3">{Pac.Active == true? "Desactivar":"Activar"}</Menu.Item>
-        <Menu.Divider />
-        <Menu.Item key="4">
-        <Button type='primary' onClick={()=>{deletePac()}} danger  icon={<DeleteOutlined/>}
-        style={{width:"100%",borderBottomLeftRadius:"20px",borderBottomRightRadius:"20px"}}>Eliminar</Button>
-        </Menu.Item>
-    </Menu>
-    );
+    const PacUpdate = () => {
+        const vars = Pac.toString(form.getFieldsValue());
 
-    const formItemLayout = {labelCol: {span: 24 },wrapperCol: {span: 24}};
+        Update("Paciente","pacienteInput",vars,"idPaciente").then((response) => {
+            if (response == "errors") { setloading(false); return; }
 
+            message.success("Paciente actualizado",1,() => {
+                PacGet();
+            });
+        });
+    }
+
+    const userMenu = [
+        {key:"item1",label:(Pac.activo?"Deshabilitar":"Habilitar"),
+        onClick:() => { ChangeST(); }},
+    ];
+
+    const ChangeST = () => {
+        setloading(true);
+        ChangeStatus("Paciente","idPacientes",idPA,"activo",Pac.activo,"idPaciente").then((response) => {
+            if (response == "errors") { setloading(false); return; }
+
+            message.success("Paciente actualizado",1,() => {
+                PacGet();
+            });
+        });
+    }
 
     return(<div>
-        <BlockRead 
-        Show={ActionsProvider.isRead}/>
 
         <FormPageHeader 
         ActionProv={ActionsProvider} 
@@ -124,176 +142,167 @@ export default function PacSDetail(){
         ActionProv={ActionsProvider} 
         Loading={Loading} 
         Avatar={""} 
+        Activo={Pac.activo}
         Text={Pac.nombres+" "+Pac.apellidos}/>
 
         <Layout 
         className='ContentLayout' 
         style={{display:Loading ? "None":""}}>
             <div style={{zIndex:"6",display:ActionsProvider.isAdd? "none":"flex"}}>
-            <WatsButton number="+50581248928"/>
+            <WatsButton number={"+"+Pac.numCel}/>
             </div>
 
             <Form 
             onFinish={()=>{onFinish()}} 
             onFinishFailed={(e)=>{form.scrollToField(e.errorFields[0].name)}} 
-            initialValues={{Nombres:Pac.nombres, Apellidos:Pac.apellidos,Phone:"505"+Pac.numCel,
-            Country:Pac.nacionalidad, Gender:Pac.sexo,Birth:moment("1990/01/01", "YYYY/MM/DD"),
-            AFPValues:["Nuez", "Cerveza"],APPValues:["Amigdalitis"],
-            APNPValues:[{"Des":"Cocaina","C":2,"F":"D"}]}} 
-            form={form} 
+            form={form}
+            disabled={ActionsProvider.isRead}
             size='Default' 
             style={{marginTop:"25px",maxWidth:"600px",width:"100%"}}>
 
                 <div style={sectionStyle}>
                     <Title level={4}>Información Personal</Title>
-                    <Form.Item name="Nombres" label="Nombres:" rules={[
-                    {validator: (_, value) => ValDoubleName(value,"nombres")}]}>
-                        <Input type="text" maxLength={30} placeholder='Nombres'/>
+
+                    <Form.Item 
+                    name="nombres" 
+                    label="Nombres:" 
+                    rules={[{validator: (_, value) => ValDoubleName(value,"nombre")}]}>
+                        <Input 
+                        type="text" 
+                        maxLength={30} 
+                        placeholder='Nombres'/>
                     </Form.Item>
 
                     <Divider/>
-                    <Form.Item name="Apellidos" label="Apellidos:" rules={[
-                    {validator: (_, value) => ValDoubleName(value,"apellidos")}]}>
-                        <Input placeholder='Apellidos'/>
+                    <Form.Item 
+                    name="apellidos"
+                    label="Apellidos:" 
+                    rules={[{validator: (_, value) => ValDoubleName(value,"apellidos")}]}>
+                        <Input 
+                        type="text"
+                        maxLength={30}
+                        placeholder='Apellidos'/>
                     </Form.Item>
 
                     <Divider/>
-                    <Form.Item label="Nacionalidad:" name="Country" rules={[{
-                    required:true,message:"¡Introduzca la Nacionalidad!"}]}>
-                        <Input placeholder='Nacionalidad'/>
+                    <Form.Item 
+                    label="Nacionalidad:" 
+                    name="nacionalidad"
+                    rules={[
+                        {required:true,message:"¡Introduzca la Nacionalidad!"},
+                        {min:5,message:"¡Introduzca una Nacionalidad válida!"},
+                    ]}>
+                        <Input 
+                        type="text"
+                        maxLength={30}
+                        placeholder='Nacionalidad'/>
                     </Form.Item>
 
                     <Divider/>
-                    <Form.Item label="Fecha de nacimiento:" name="Birth" rules={[{
-                    required:true,message:"¡Introduzca la fecha de Nacimiento!"}]}>
-                        <DatePicker inputReadOnly={true} picker="date"/>
+                    <Form.Item 
+                    label="Fecha de nacimiento:" 
+                    name="fechaNacimiento"
+                    rules={[{required:true,message:"¡Introduzca la fecha de Nacimiento!"}]}>
+                        <DatePicker
+                        inputReadOnly={true}
+                        picker="date"/>
                     </Form.Item>
 
                     <Divider/>
-                    <Form.Item label="Género:" name="Gender" rules={[{required:true,message:"¡Seleccione el género!"}]}>
+                    <Form.Item 
+                    label="Género:" 
+                    name="sexo"
+                    rules={[{required:true,message:"¡Seleccione el género!"}]}>
                         <Select>
-                            <Option value="M">Masculino</Option>
-                            <Option value="F">Femenino</Option>
-                            <Option value="O">Otro</Option>
+                            <Select.Option value="M">Masculino</Select.Option>
+                            <Select.Option value="F">Femenino</Select.Option>
                         </Select>
                     </Form.Item>
                 </div>
 
                 <div style={sectionStyle}>
                     <Title level={4}>Información de Contacto</Title>
-                    <Form.Item name="Phone" label="Numero Telefónico:" rules={[{
-                        required: true, message: 'Introduzca el número Celular!'}]}>
+
+                    <Form.Item 
+                    name="numCel"
+                    label="Numero Telefónico:" 
+                    rules={[{required: true, message: 'Introduzca el número Celular!'}]}>
                         <PhoneInput/>
+                    </Form.Item>
+
+                    <Divider/>
+                    <Form.Item
+                    name="direccion"
+                    label="Dirección:"
+                    rules={[
+                        {required: true, message: 'Introduzca la dirección!'},
+                        {min:10,message:"¡Introduzca una dirección con más de 10 caracteres!"}
+                    ]}>
+                        <Input.TextArea
+                        showCount
+                        maxLength={150}
+                        autoSize={{
+                            minRows: 2,
+                            maxRows: 6,
+                        }}
+                        placeholder='Dirección'/>
                     </Form.Item>
                 </div>
 
                 <div style={sectionStyle}>
                     <Title level={4}>Anamnesis A</Title>
 
-                    <Collapse accordion>
-                        <Collapse.Panel header={AnamAStrings[0]} key={0}>
-                        <Form.List name="AFPValues">
-                                {(fields, { add, remove }, { errors }) => (<>{fields.map((field, index) => (
-                                    <Form.Item {...formItemLayout}
-                                    label={AFPStrings[SelectedAFP[index]]}  key={field.key}>
-                                        
-                                        <Form.Item {...field} rules={[{required:true,message:"¡Especifique!"}]} noStyle>
-                                            <Input placeholder="Descripción" style={{ width: '100%' }} />
-                                        </Form.Item>
-                                        <Divider/>
-                                    </Form.Item>))}
-                                    
-                                    <Form.Item label="AFP:">
-                                        <Select mode="multiple" style={{ width: '100%' }} value={SelectedAFP} 
-                                        placeholder="AFP" showSearch={false}
-                                        onSelect={()=>{add()}}
-                                        onDeselect={(value)=>{remove(SelectedAFP.indexOf(value))}} 
-                                        onChange={(value)=>{setSelectedAFP(value)}}>
-                                            {AFP}
-                                        </Select>
-                                        <Form.ErrorList errors={errors} />
-                                    </Form.Item>
-                                    </>)}
-                        </Form.List>
-                        </Collapse.Panel>
-                        <Collapse.Panel header={AnamAStrings[1]} key={1}>
-                        <Form.List name="APNPValues">
-                            {(fields, { add, remove }, { errors }) => (
-                            <>
-                                {fields.map((field,index) => (
-                                <Form.Item label={APNPStrings[SelectedAPNP[index]]} key={[field.key,"1"]}>
-                                    <Form.Item noStyle key={[field.key,"2"]} name={[field.name, 'Des']}
-                                    rules={[{ required: true, message: '¡Describe el Padecimiento!' }]}>
-                                        <Input.TextArea autoSize style={{width:"100%"}} placeholder="Descripción"/>
-                                    </Form.Item>
+                    <Form.Item
+                    name="profesionOficio"
+                    label="Profesión u Oficio:"
+                    rules={[
+                        {required: true, message: 'Introduzca la profesión u oficio!'},
+                        {min:5,message:"¡Introduzca una profesión u oficio válida!"}
+                    ]}>
+                        <Input
+                        type="text"
+                        maxLength={30}
+                        placeholder='Profesión u Oficio'/>
+                    </Form.Item>
 
-                                    <Form.Item noStyle key={[field.key,"3"]} name={[field.name, 'C']}
-                                    rules={[{ required: true, message: '¡Indica su Cantidad!' }]}>
-                                        <InputNumber max={99} min={1} style={{width:"50%"}} placeholder="Cantidad"/>
-                                    </Form.Item>
-                                    <Form.Item noStyle key={[field.key,"4"]} name={[field.name, 'F']}
-                                    rules={[{ required: true, message: '¡Indica su Frecuencia!' }]}>
-                                        <Select style={{width:"50%"}}>
-                                            <Select.Option key={0} value="M">Minutos</Select.Option>,
-                                            <Select.Option key={1} value="H">Hora</Select.Option>,
-                                            <Select.Option key={2} value="D">Dia</Select.Option>,
-                                            <Select.Option key={3} value="M">Mes</Select.Option>,
-                                        </Select>
-                                    </Form.Item>
-                                </Form.Item>))}
-                                
-                                <Form.Item label="APNP:">
-                                    <Select mode="multiple" style={{ width: '100%' }} value={SelectedAPNP} 
-                                    placeholder="APNP" showSearch={false}
-                                    onSelect={()=>{add()}}
-                                    onDeselect={(value)=>{remove(SelectedAPNP.indexOf(value))}} 
-                                    onChange={(value)=>{setSelectedAPNP(value)}}>
-                                        {APNP}
-                                    </Select>
-                                    <Form.ErrorList errors={errors} />
-                                </Form.Item>
-                            </>
-                            )}
-                        </Form.List>
-                        </Collapse.Panel>
-                        <Collapse.Panel header={AnamAStrings[2]} key={2}>
-                        <Form.List name="APPValues">
-                                {(fields, { add, remove }, { errors }) => (<>{fields.map((field, index) => (
-                                    <Form.Item {...formItemLayout}
-                                    label={APPStrings[SelectedAPP[index]]} key={field.key}>
-                                        
-                                        <Form.Item {...field} rules={[{required:true,message:"Especifique"}]} noStyle>
-                                            <Input.TextArea autoSize rows={2} maxLength={500} placeholder="Descripción" style={{ width: '100%' }} />
-                                        </Form.Item>
-                                        <Divider/>
-                                    </Form.Item>))}
-                                    
-                                    <Form.Item label="APP:">
-                                        <Select mode="multiple" style={{ width: '100%' }} value={SelectedAPP} 
-                                        placeholder="APP" showSearch={false}
-                                        onSelect={()=>{add()}}
-                                        onDeselect={(value)=>{remove(SelectedAPP.indexOf(value))}} 
-                                        onChange={(value)=>{setSelectedAPP(value)}}>
-                                            {APP}
-                                        </Select>
-                                        <Form.ErrorList errors={errors} />
-                                    </Form.Item>
-                                    </>)}
-                        </Form.List>
-                        </Collapse.Panel>
-                        <Collapse.Panel header={AnamAStrings[3]} key={3}>
-                            <Form.Item name="HLisWorking">
-                               <Checkbox checked={isWorking} onChange={()=>{setisWorking(!isWorking)}}>Trabajo</Checkbox> 
-                            </Form.Item>
-                            <Form.Item name="HLLugar" label="Lugar" rules={[{required:isWorking,message:"¡Especifique!"}]}>
-                                <Input disabled={!isWorking} placeholder="Lugar" style={{ width: '100%' }}/>
-                            </Form.Item>
-                            <Form.Item name="HLAños" label="Años" rules={[{required:isWorking,message:"¡Especifique!"}]}>
-                                <InputNumber disabled={!isWorking} type="number" maxLength="3" max="100" placeholder="Años del trabajo Actual" style={{ width: '100%' }}/>
-                            </Form.Item>
-                            
-                        </Collapse.Panel>
-                    </Collapse>
+                    <Divider/>
+                    <Form.Item
+                    name="horasTrabajo"
+                    label="Horas de trabajo:"
+                    rules={[{required: true, message: 'Introduzca las horas de trabajo!'}]}>
+                        <InputNumber
+                        min={0}
+                        max={24}
+                        placeholder='Horas de trabajo'/>
+                    </Form.Item>
+
+                    <Divider/>
+                    <Form.Item
+                    name="escolaridad"
+                    label="Escolaridad:"
+                    rules={[
+                        {required: true, message: 'Introduzca la escolaridad!'},
+                        {min:5,message:"¡Introduzca una escolaridad válida!"}
+                    ]}>
+                        <Input
+                        type="text"
+                        maxLength={30}
+                        placeholder='Escolaridad'/>
+                    </Form.Item>
+
+                    <Divider/>
+                    <Form.Item
+                    name="estadoCivil"
+                    label="Estado Civil:"
+                    rules={[
+                        {required: true, message: 'Introduzca el estado civil!'},
+                        {min:5,message:"¡Introduzca un estado civil válido!"}
+                    ]}>
+                        <Input
+                        type="text"
+                        maxLength={30}
+                        placeholder='Estado Civil'/>
+                    </Form.Item>
                 </div>
 
                 <ButtonSubmit ActionProv={ActionsProvider} isLoading={isLoading}/>

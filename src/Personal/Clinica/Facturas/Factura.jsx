@@ -1,33 +1,52 @@
 import { ActionsProviders } from "../../../Utils/ActionsProviders";
 import { BlockRead, ButtonSubmit, FormPageHeader, sectionStyle } from "../../../Utils/TextUtils";
 import React, {useState,useEffect} from 'react';
-import { Button, Divider, Form, Input, InputNumber, Layout, Menu, message, Typography } from "antd";
+import { Button, Divider, Form, Input, InputNumber, Layout, Menu, message, Skeleton, Typography } from "antd";
 import { useNavigate } from "react-router-dom";
+import { Factura } from "../../../Models/Models";
+import { Create, getById } from "../../../Utils/FetchingInfo";
 const { Title } = Typography;
 
 export default function FacturaDet (props) {
     let Navigate = useNavigate();
-    const {idCita,idFactura,action} = props;
+    const {idCita , idFactura , action} = props;
     const [isLoading,setloading]= useState(false);
 
-    const [Loading,setLoading] = useState(idFactura==null? false:true);
+    const [Loading,setLoading] = useState(idFactura ? true:false);
     const ActionsProvider = new ActionsProviders(action);/*Actions crud*/
-    const [Factu,setFactu] = useState([]);/* All terapeuta info after fetching */
+
+    const [Factu,setFactu] = useState(new Factura(null));
+    const [descuentoString,setDescuentoString] = useState("");
 
     const [form] = Form.useForm();
 
-    if (!ActionsProvider.isAdd) {
-        useEffect(() => {FactGet(idFactura)},[])
-    }
+    useEffect(() => {
+        if (ActionsProvider.isAdd) return
+        FactGet(idFactura)
+    },[])
 
-    const FactGet = (idFactura) =>{
-        setTimeout(() => {
-            const Facttura = new Factura(idFactura,1,1000,1000,0);
-            const data = new Factura(Facttura.idFactura,Facttura.idCita,Facttura.total,Facttura.descuento,Facttura.subtotal);
-            setFactu(data);
+    const FactGet = () =>{
+        const items = `
+        idFactura
+        idCita
+        descuento
+        subTotal
+        total
+        activo
+        `;
+        getById("facturas","idFactura",idFactura,items).then((res) => {
+            if (res == "errors") return;
+
+            const auxFact = new Factura(res.data.facturas.items[0]);
+            form.setFieldsValue({
+                subTotal: auxFact.subTotal,
+                total: auxFact.total,
+                descuento: auxFact.descuento,
+            });
+            setFactu(auxFact);
             setLoading(false);
-            form.resetFields();
-        }, 1000);
+            setloading(false);
+        })    
     }
 
     const onBack = () => {
@@ -39,70 +58,106 @@ export default function FacturaDet (props) {
     const onFinish = () => {
         setloading(true);
         if (ActionsProvider.isAdd) {
-            let data = {
-                idCita: idCita,
-                descuento: form.getFieldValue("Des"),
-                subTotal: form.getFieldValue("Sub"),
-                total: form.getFieldValue("Total")
-            }
-            CreateFact(data).then(res => {
-                message.success("Facturado",1).then(()=>{
-                setloading(false);
-                Navigate("/Personal/Citas",{replace:true});
-                })
-            }).catch(err => {
-                message.error("Error al facturar",1);
-                setloading(false);
-            });
+            AddFactu();
         }else{
-            if (true){
-                message.success("Factura Modificada",1).then(()=>{
-                setloading(false);
-                Navigate(-1);
-                })
-            }else{message.error("No se pudo Modificar la Factura",2);setloading(false);}
+            
         }
     }
 
-    const userMenu = (
-        <Menu style={{width:"200px",padding:"0px"}}>
-            <Menu.Item key="0" onClick={()=>{}} 
-            style={{display:true?"":"none"}}>Generar PDF</Menu.Item>
-            <Menu.Item key="2" style={{display:true?"":"none"}}>
-            <Button  onClick={()=>{}} 
-            style={{width:"100%",color:"red"}}>Eliminar</Button>
-            </Menu.Item>
-        </Menu>
-    );
+    const AddFactu = () => {
+        const vars = Factu.toString(form.getFieldsValue(),idCita);
+        console.log(vars);
+
+        Create("Factura","facturaInput",vars,"idFactura").then((res) => {
+            if (res == "errors") { setloading(false); return; }
+
+            message.success("Facturado", 2, () => {
+                props.onAddFactura();
+            });
+        })
+    }
+
+    const userMenu = [
+        {key:"item1",label:"GenerarPDF",onClick:() => {message.info("GenerarPDF")}},
+    ];
 
     return (<div>
-        <BlockRead Show={ActionsProvider.isRead}/>
-        <FormPageHeader ActionProv={ActionsProvider} Text="Factura" menu={userMenu} onBack={()=>{onBack()}}/>
+        <FormPageHeader 
+        ActionProv={ActionsProvider} 
+        Text="Factura" 
+        menu={userMenu} 
+        onBack={()=>{onBack()}}/>
 
-        <Layout className='ContentLayout' style={{display:Loading ? "None":""}}>
-            <Form onFinish={()=>{onFinish()}} onFinishFailed={(e)=>{form.scrollToField(e.errorFields[0].name)}} 
-            initialValues={{Sub:Factu.subtotal,Des:Factu.descuento,Total:Factu.total}} 
-            form={form} size='Default' style={{marginTop:"25px",maxWidth:"600px",width:"100%"}}>
+        {Loading ? 
+         <Skeleton.Button 
+         active={true} 
+         size='large' 
+         shape="square" 
+         block 
+         style={{width:"100%",height:"400px"}}/> : null}
+        <Layout 
+        className='ContentLayout'>
+
+            <Form 
+            onFinish={()=>{onFinish()}} 
+            onFinishFailed={(e)=>{form.scrollToField(e.errorFields[0].name)}} 
+            form={form} 
+            size='Default'
+            disabled={ActionsProvider.isRead}
+            style={{display:Loading? "none":"",marginTop:"25px",maxWidth:"600px",width:"100%"}}>
 
                 <div style={sectionStyle}>
                     <Title level={4}>Descripción</Title>
-                    <Form.Item name="Sub" label="Sub total:" rules={[{
-                        required:true,message:"¡Ingrese el subtotal!"}]}>
-                        <InputNumber style={{width:"100%"}} type="number" maxLength={6} placeholder='Subtotal'/>
+
+                    <Form.Item 
+                    name="subTotal" 
+                    label="Sub total:" 
+                    rules={[{required:true,message:"¡Ingrese el subtotal!"}]}>
+                        <InputNumber 
+                        style={{width:"100%"}} 
+                        type="number"
+                        min={0}
+                        maxLength={6}
+                        prefix="$"
+                        placeholder='Subtotal'
+                        onChange={(value) => {
+                            setDescuentoString("Porcentaje: "+ parseFloat((Factu.descuento*100) / value).toFixed(2) + "%")
+                            Factu.subTotal = value
+                        }}/>
                     </Form.Item>
+
                     <Divider/>
-                    <Form.Item name="Des" label="Descuento:">
-                        <InputNumber style={{width:"100%"}} type="number" maxLength={6} placeholder='Descuento'/>
+                    <Form.Item 
+                    name="descuento" 
+                    label="Descuento:"
+                    extra={descuentoString}>
+                        <InputNumber 
+                        style={{width:"100%"}} 
+                        type="number"
+                        prefix="$"
+                        maxLength={6} 
+                        placeholder='Descuento'
+                        onChange={(value) => {
+                            Factu.descuento = value
+                            setDescuentoString("Porcentaje: "+ parseFloat((value*100) / Factu.subTotal).toFixed(2) + "%")
+                        }}/>
                     </Form.Item>
+
                     <Divider/>
-                    <Form.Item name="Total" label="Total:" rules={[{
-                        required:true,message:"¡Ingrese el Total!"}]}>
-                        <InputNumber style={{width:"100%"}} type="number" maxLength={6} placeholder='Total'/>
+                    <Form.Item 
+                    name="total" 
+                    label="Total:" 
+                    rules={[{required:true,message:"¡Ingrese el Total!"}]}>
+                        <InputNumber 
+                        style={{width:"100%"}} 
+                        type="number" 
+                        min={Factu.subTotal - Factu.descuento}
+                        maxLength={6} 
+                        placeholder='Total'/>
                     </Form.Item>
                 </div>
                 <ButtonSubmit ActionProv={ActionsProvider} isLoading={isLoading}/>
             </Form>
         </Layout>
-
     </div>)
 }

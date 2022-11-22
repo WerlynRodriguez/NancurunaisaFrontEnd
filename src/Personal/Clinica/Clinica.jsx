@@ -1,70 +1,107 @@
-import React from 'react';
-import { Layout, Typography,Avatar,Row,Col } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Layout, Typography,Avatar,Row,Col, Skeleton, List, Space } from 'antd';
 import "../../Utils/TextUtils.css";
 import {SmileFilled,MedicineBoxFilled,EnvironmentFilled, PercentageOutlined, HeartOutlined, ContainerOutlined} from "@ant-design/icons";
-import { Link } from 'react-router-dom';
-import { DenyFunction, Ranges } from '../../Utils/RangeProviders';
+import { Link, useNavigate } from 'react-router-dom';
+import { RangeProvider } from '../../Utils/RangeProviders';
 const { Title } = Typography;
-
-function ButtonLink(props){
-    return(<Link to={props.to}>
-        <Row 
-        className="Cardview"
-        style={{
-            minWidth: "300px",
-            minHeight: "100px",
-            borderRadius: "20px",
-            marginTop: "15px",
-            backgroundColor: "white",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow:"6px 6px 12px #c5c5c5, -6px -6px 12px #ffffff",
-            transition: "transition: all .3s"
-        }}>
-            <Col className='ColCardTitle' span={18}>
-                <Title level={3}>{props.title}</Title>
-            </Col>
-            <Col className='ColCardIcon' span={4}>
-                {props.icon}
-            </Col> 
-        </Row>
-    </Link>)
-}
 
 //This component is the main page of the clinica seccions
 export default function Clinica(){
+    let Navigate = useNavigate();
+    const buttons = [
+        {
+            title:"Pacientes",
+            link:"/Personal/Clinica/Pacientes",
+            icon:<SmileFilled/>
+        },
+        {
+            title:"Terapeutas",
+            link:"/Personal/Clinica/Terapeutas",
+            icon:<MedicineBoxFilled/>
+        },
+        {
+            title:"Terapias",
+            link:"/Personal/Clinica/Terapias",
+            icon:<HeartOutlined/>
+        },
+        {
+            title:"Sucursales",
+            link:"/Personal/Clinica/Sucursals",
+            icon:<EnvironmentFilled/>
+        },
+        {
+            title:"Promociones",
+            link:"/Personal/Clinica/Promos",
+            icon:<PercentageOutlined/>
+        }
+    ]
+
+    const [rangeProvider,setRangeProvider] = useState(new RangeProvider());
+    const [loading,setLoading] = useState(true);
+
+    useEffect(() => {
+        rangeProvider.loadPermisos(() => {
+            setLoading(false);
+        });
+    },[]);
+
+    function ButtonLink(props){
+        if (loading) return null;
+
+        //If the user has the permission for action "Listar"
+        if (!rangeProvider.verifyPermiso("Listar",props.title)) return null;
+
+        return(
+            <div style={{width:"100%",padding:"8px 15px"}}>
+                <Row 
+                className="Cardview"
+                onClick={() => {Navigate(props.to)}}>
+                    <Col span={18}>
+                        <Title level={3}>{props.title}</Title>
+                    </Col>
+                    <Col span={4}>
+                        {props.icon}
+                    </Col> 
+                </Row>
+            </div>
+        );
+    }
+
     return(<div>
         <div className="BackMenu"/>
+
         <Title 
         level={2} 
         style={{marginTop:"20px",marginLeft:"20px",color:"white"}}>
             Clínica
         </Title>
 
-        <Layout className='ContentLayout' style={{borderTopLeftRadius:"50px",borderTopRightRadius:"50px",backgroundColor:"white"}}>
-            <ButtonLink 
-            to='/Personal/Clinica/Pacientes' 
-            title="Pacientes" 
-            icon={<SmileFilled style={{color:"#5a33ae",fontSize:"40px"}}/>}/>
-            
-            <ButtonLink 
-            to="/Personal/Clinica/Terapeutas" 
-            title="Terapeutas" 
-            icon={<MedicineBoxFilled style={{color:"#5a33ae",fontSize:"40px"}}/>}/>
+        <Layout 
+        className='ContentLayout' 
+        style={{borderTopLeftRadius:"50px",borderTopRightRadius:"50px"}}>
 
-            <ButtonLink 
-            to='/Personal/Clinica/Terapias' 
-            title='Terapias' 
-            icon={<HeartOutlined style={{color:"#5a33ae",fontSize:"40px"}}/>}/>
+            {loading ?
             
-            <ButtonLink 
-            to='/Personal/Clinica/Sucursales' 
-            title='Sucursales' icon={<EnvironmentFilled style={{color:"#5a33ae",fontSize:"40px"}}/>}/>
-
-            <ButtonLink 
-            to="/Personal/Clinica/Promos" 
-            title="Promociones" 
-            icon={<PercentageOutlined style={{color:"#5a33ae",fontSize:"40px"}}/>}/>
+            <Skeleton.Button
+            active
+            shape="round"
+            style={{minWidth: "300px",minHeight: "100px"}}/>
+            :
+            <List
+            style={{width:"100%"}}
+            grid={{ gutter: 16, xs: 1, sm: 2, md: 2,lg: 2,xl: 3,xxl: 3 }}
+            dataSource={buttons}
+            renderItem={(item,index) => (
+                <ButtonLink
+                    key={index}
+                    to={item.link}
+                    title={item.title}
+                    icon={item.icon}/>
+            )}
+            />
+                
+            }
         </Layout>
         </div>)
 }

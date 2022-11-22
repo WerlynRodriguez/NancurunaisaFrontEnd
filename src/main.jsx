@@ -1,34 +1,5 @@
 import ReactDOM from 'react-dom/client';
-import React from 'react';
-import Landing from "./Landing/Landing";
-import SignIn from './SignIn/SignIn';
-import Home from "./Personal/Home/Home";
-
-import Ajustes from "./Personal/Perfil/Ajustes";
-
-import Clinica from "./Personal/Clinica/Clinica";
-import Pacientes from "./Personal/Clinica/Pacientes/Pacientes";
-import PacSDetail from './Personal/Clinica/Pacientes/PacienteDetail';
-
-import Sucursales from "./Personal/Clinica/Sucursal/Sucursales";
-import SucurDetail from './Personal/Clinica/Sucursal/SucurDetail';
-
-import Terapeutas from "./Personal/Clinica/TeraTa/Terapeutas";
-import TeraTaDetail from "./Personal/Clinica/TeraTa/TerataDetail";
-
-import Terapias from './Personal/Clinica/Terapia/Terapias';
-import TeraDetail from './Personal/Clinica/Terapia/TeraDetail';
-
-import { FormActions } from './Utils/ActionsProviders';
-import { Allow, Deny, Ranges } from './Utils/RangeProviders';
-
-import Citas from "./Personal/Citas/Citas";
-import CitaDetail from './Personal/Citas/CitaDetail';
-import ReportsMenu from './Personal/Reports/Reports';
-
-import BottomBar from "./Personal/Home/BottomBar";
-
-import RequireAuth from "./Utils/RequireAuth";
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 
 import {
   BrowserRouter as Router,
@@ -36,116 +7,157 @@ import {
   Route,
   Routes
 } from "react-router-dom";
-import Promos from './Personal/Clinica/Promociones/Promos';
-import Promo from './Personal/Clinica/Promociones/Promo';
+
+import { FormActions, UserActions } from './Utils/ActionsProviders';
+import {OnlyAdmin, RangeProvider} from './Utils/RangeProviders';
+import RequireAuth from "./Utils/RequireAuth";
+
+const Landing = lazy(() => import("./Landing/Landing"));
+const SignIn = lazy(() => import("./SignIn/SignIn")); 
+const Home = lazy(() => import("./Personal/Home/Home"));
+
+const Ajustes = lazy(() => import("./Personal/Perfil/Ajustes"));
+
+const Clinica = lazy(() => import("./Personal/Clinica/Clinica"));
+
+const Citas = lazy(() => import("./Personal/Citas/Citas"));
+const CitaDetail = lazy(() => import("./Personal/Citas/CitaDetail"));
+
+const ReportsMenu = lazy(() => import("./Personal/Reports/Reports"));
+
+const BottomBar = lazy(() => import("./Personal/Home/BottomBar"));
+
 import SucRep from './Personal/Reports/SucSRep';
-import AdUsers from './Personal/Perfil/Admin/AdUsers';
-import AdRols from './Personal/Perfil/Admin/AdRols';
-import UserDetail from './Personal/Perfil/Admin/UserDetail';
-import RolDetail from './Personal/Perfil/Admin/RolDetail';
+import LoadPage from './Personal/Perfil/LoadPage';
+
+const AdUsers = lazy(() => import("./Personal/Perfil/Admin/AdUsers"));
+const AdRols = lazy(() => import("./Personal/Perfil/Admin/AdRols"));
+
+const UserDetail = lazy(() => import("./Personal/Perfil/Admin/UserDetail"));
+const RolDetail = lazy(() => import("./Personal/Perfil/Admin/RolDetail"));
 
 
+//================================================
+// Todas las rutas de la seccion clinica
+//================================================
+const AllNavigations = [
+  {key:"paci", path:"Paciente", vari:"PA", module:"Pacientes",
+  list:"Pacientes/Pacientes",
+  detail:"Pacientes/PacienteDetail"},
+
+  {key:"terata", path:"Terapeuta", vari:"TA", module:"Terapeutas",
+  list:"TeraTa/Terapeutas", 
+  detail:"TeraTa/TerataDetail"},
+
+  {key:"sucu", path:"Sucursal", vari:"SU", module:"Sucursales",
+  list:"Sucursal/Sucursales",
+  detail:"Sucursal/SucurDetail"},
+
+  {key:"tera", path:"Terapia", vari:"TE", module:"Terapias",
+  list:"Terapia/Terapias",
+  detail:"Terapia/TeraDetail"},
+
+  {key:"promo", path:"Promo", vari:"PR", module:"Promociones",
+  list:"Promociones/Promos",
+  detail:"Promociones/Promo"},
+]
+
+const getRoute = (props) => {
+  const {key, path, elemento, action, module} = props;
+  const Element = lazy(() => import(`./Personal/Clinica/${elemento}`));
+
+  const getElement = () => {
+    return <Element key={key}/>
+  }
+
+  return (
+    <Route path={path} key={key} element={getElement()}/>
+  )
+}
 
 function Nancurunaisa(){
+
   return(
     <Router>
-      <Routes>
-        <Route index element={<Landing/>}/>
-        <Route path='Landing' element={<Landing/>}/>
-        <Route path='SignIn' element={<SignIn/>}/>
+      <Suspense 
+      fallback={<LoadPage/>}
+      >
 
-        <Route path='Personal' element={[<RequireAuth key={0}/>,<BottomBar key={1}/>]}>
-          <Route path='Home' element={<Home key="Home"/>}/>
+        <Routes>
+          <Route index element={<Landing/>}/>
+          <Route path='Landing' element={<Landing/>}/>
+          <Route path='SignIn' element={<SignIn/>}/>
 
-          <Route path='Citas' element={<Citas key="Citas"/>}/>
-          <Route path='Cita' element={<Outlet key="OutCita"/>}>
-            <Route element={<Deny Exclude={[Ranges.Employ]}/>}>
+          <Route path='Personal' element={[<RequireAuth key={0}/>,<BottomBar key={1}/>]}>
+            <Route path='Home' element={<Home key="Home"/>}/>
+
+            <Route path='Citas' element={<Citas key="Citas"/>}/>
+            <Route path='Cita' element={<Outlet key="OutCita"/>}>
+
               <Route path={FormActions.Update+"/:idCita"} element={<CitaDetail key="CitaUpdt"/>}/>
+              <Route path={FormActions.Add} element={<CitaDetail key="CitaAdd"/>}/>
+              <Route path={FormActions.Read+"/:idCita"} element={<CitaDetail key="CitaRead"/>}/>
             </Route>
-            <Route path={FormActions.Add} element={<CitaDetail key="CitaAdd"/>}/>
-            <Route path={FormActions.Read+"/:idCita"} element={<CitaDetail key="CitaRead"/>}/>
+
+            <Route path='Clinica' element={<Outlet key="OutClin"/>}>
+              <Route index element={<Clinica key="Clinic"/>}/>
+
+              {AllNavigations.map((nav) => (<>
+                
+                {getRoute({key:nav.key.concat('List'), action:UserActions.Listar,
+                path:nav.path.concat('s'), elemento:nav.list})}
+
+                <Route 
+                path={nav.path} 
+                element={<Outlet key={nav.key.concat('Out')}/>}>
+
+                  {getRoute({key:nav.key.concat('Updt'), action:UserActions.Editar,
+                  path:FormActions.Update+'/:id'+nav.vari, elemento:nav.detail})}
+
+                  {getRoute({key:nav.key.concat('Add'), action:UserActions.Añadir,
+                  path:FormActions.Add, elemento:nav.detail})}
+
+                  {getRoute({key:nav.key.concat('Read'), action:UserActions.Ver,
+                  path:FormActions.Read+'/:id'+nav.vari, elemento:nav.detail})}
+
+                </Route>
+              </>))}
+
+              <Route path='*' element={<Clinica key="ClinicD"/>}/>
+            </Route>
+
+            <Route path="Reportes" element={<ReportsMenu key="Reportes"/>}/>
+            <Route path='Reporte' element={<Outlet key="OutR"/>}>
+              <Route path={"Sucursales/:idFec"} element={<SucRep key="RpSuc"/>}/>
+            </Route>
+
+            <Route path='Ajustes' element={<Outlet key="OutAju"/>}>
+              <Route index element={<Ajustes key="Settings"/>}/>
+              
+              <Route path="Admin" element={<OnlyAdmin key="Admin"/>}>
+                <Route path="Usuarios" element={<AdUsers/>}/>
+                <Route path="Usuario" element={<Outlet key="OutUser"/>}>
+
+                  <Route path={FormActions.Add} element={<UserDetail key="UserAdd"/>}/>
+                  <Route path={FormActions.Read+"/:idUS"} element={<UserDetail key="UserRead"/>}/>
+                  <Route path={FormActions.Update+"/:idUS"} element={<UserDetail key="UserUpdt"/>}/>
+                </Route>
+
+                <Route path="Roles" element={<AdRols/>}/>
+                <Route path="Rol" element={<Outlet key="OutRol"/>}>
+
+                  <Route path={FormActions.Add} element={<RolDetail key="RolAdd"/>}/>
+                  <Route path={FormActions.Read+"/:idRol"} element={<RolDetail key="RolRead"/>}/>
+                  <Route path={FormActions.Update+"/:idRol"} element={<RolDetail key="RolUpdt"/>}/>
+                </Route>
+              </Route>
+            </Route>
+            <Route path='*' element={<Home key="HomeD"/>}/>
           </Route>
 
-          <Route path='Clinica' element={<Outlet key="OutClin"/>}>
-            <Route index element={<Clinica key="Clinic"/>}/>
-
-            <Route path='Pacientes' element={<Pacientes key="PacS"/>}/>
-            <Route path='Paciente' element={<Outlet key="OutTPacS"/>}>
-            <Route element={<Deny Exclude={[Ranges.Manager]}/>}>
-              <Route path={FormActions.Update+'/:idPA'} element={<PacSDetail key="PacSUpdt"/>}/>
-              <Route path={FormActions.Add} element={<PacSDetail key="PacSAdd"/>}/>
-              <Route path={FormActions.Read+'/:idPA'} element={<PacSDetail key="PacSRead"/>}/>
-            </Route>
-            </Route>
-
-            <Route path="Terapeutas" element={<Terapeutas key="TeraTas"/>}/>
-            <Route path='Terapeuta' element={<Outlet key="OutTTas"/>}>
-              <Route element={<Allow Permited={[Ranges.Owner,Ranges.Manager]}/>}>
-                <Route path={FormActions.Update+'/:idTA'} element={<TeraTaDetail key="TTasUpdt"/>}/>
-                <Route path={FormActions.Add} element={<TeraTaDetail key="TTasAdd"/>}/>
-              </Route>
-              <Route path={FormActions.Read+'/:idTA'} element={<TeraTaDetail key="TTasRead"/>}/>
-            </Route>
-
-            <Route path="Sucursales" element={<Sucursales key="Sucurs"/>}/>
-            <Route path='Sucursal' element={<Outlet key="OutSU"/>}>
-              <Route element={<Allow Permited={[Ranges.Owner,Ranges.Manager]}/>}>
-                <Route path={FormActions.Update+'/:idSU'} element={<SucurDetail key="SUUpdt"/>}/>
-                <Route path={FormActions.Add} element={<SucurDetail key="SUAdd"/>}/>
-              </Route>
-              <Route path={FormActions.Read+'/:idSU'} element={<SucurDetail key="SURead"/>}/>
-            </Route>
-
-            <Route path="Terapias" element={<Terapias key="Teras"/>}/>
-            <Route path='Terapia' element={<Outlet key="OutTE"/>}>
-              <Route element={<Allow Permited={[Ranges.Owner,Ranges.Manager]}/>}>
-                <Route path={FormActions.Update+'/:idTE'} element={<TeraDetail key="TEUpdt"/>}/>
-                <Route path={FormActions.Add} element={<TeraDetail key="TEAdd"/>}/>
-              </Route>
-              <Route path={FormActions.Read+'/:idTE'} element={<TeraDetail key="TERead"/>}/>
-            </Route>
-
-            <Route path="Promos" element={<Promos key="Promos"/>}/>
-            <Route path='Promo' element={<Outlet key="OutP"/>}>
-              <Route path={FormActions.Update+"/:idP"} element={<Promo key="PromoUpdt"/>}/>
-              <Route path={FormActions.Add} element={<Promo key="PromoAdd"/>}/>
-              <Route path={FormActions.Read+"/:idP"} element={<Promo key="PromoRead"/>}/>
-            </Route>
-
-            <Route path='*' element={<Clinica key="ClinicD"/>}/>
-          </Route>
-
-          <Route path="Reportes" element={<ReportsMenu key="Reportes"/>}/>
-          <Route path='Reporte' element={<Outlet key="OutR"/>}>
-            <Route path={"Sucursales/:idFec"} element={<SucRep key="RpSuc"/>}/>
-          </Route>
-
-          <Route path='Ajustes' element={<Outlet key="OutAju"/>}>
-            <Route index element={<Ajustes key="Settings"/>}/>
-            
-            <Route path="Admin" element={<Outlet key="OutAdm"/>}>
-              <Route path="Usuarios" element={<AdUsers/>}/>
-              <Route path="Usuario" element={<Outlet key="OutUser"/>}>
-
-                <Route path={FormActions.Add} element={<UserDetail key="UserAdd"/>}/>
-                <Route path={FormActions.Read+"/:idUS"} element={<UserDetail key="UserRead"/>}/>
-                <Route path={FormActions.Update+"/:idUS"} element={<UserDetail key="UserUpdt"/>}/>
-              </Route>
-
-              <Route path="Roles" element={<AdRols/>}/>
-              <Route path="Rol" element={<Outlet key="OutRol"/>}>
-
-                <Route path={FormActions.Add} element={<RolDetail key="RolAdd"/>}/>
-                <Route path={FormActions.Read+"/:idRol"} element={<RolDetail key="RolRead"/>}/>
-                <Route path={FormActions.Update+"/:idRol"} element={<RolDetail key="RolUpdt"/>}/>
-              </Route>
-            </Route>
-          </Route>
-          <Route path='*' element={<Home key="HomeD"/>}/>
-        </Route>
-
-        <Route path='*' element={<Landing/>}/>
-      </Routes>
+          <Route path='*' element={<Landing/>}/>
+        </Routes>
+      </Suspense>
     </Router>
   )
 }

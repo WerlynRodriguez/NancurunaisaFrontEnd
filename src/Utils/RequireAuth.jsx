@@ -1,7 +1,7 @@
 import { useLocation, Navigate, Outlet } from "react-router-dom";
 import React from 'react';
 
-function RequireAuth (){
+export default function RequireAuth (){
     const location = useLocation();
     const auth = localStorage.getItem('accessToken');
 
@@ -11,5 +11,3 @@ function RequireAuth (){
         return(<Outlet/>)
     }
 }
-
-export default RequireAuth

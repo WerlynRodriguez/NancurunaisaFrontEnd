@@ -13,3 +13,4 @@ export function getaction(url,pos){
 }
 
 export const FormActions={ Read:"View", Update:"Uptd", Add:"Add" }
+export const UserActions={ Listar:"Listar", Ver:"Ver", Añadir:"Añadir", Editar:"Editar", CambiarE:"CambiarEstado" };

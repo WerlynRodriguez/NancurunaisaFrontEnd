@@ -1,82 +1,34 @@
-@import "../../Components/Colors.css";
-
-.nav{
+.bottomBar{
+    background-color: #212121;
+    color:#c5c5c5;
     position: fixed;
+    display: flex;
+    align-items: center;
+    text-align: center;
     bottom: 0;
-    /*right: 0;*/
     width: 100%;
-    left: 0;
-    align-items: center;
-    background-color: var(--bgNav);
-    border-top-left-radius: 25px;
-    border-top-right-radius: 25px;
-    /*z-index: 6;*/
-    transition: all 0.3s ease 0s;
+    height: 60px;
+    padding: 0px 5%;
+    justify-content: space-between;
+    z-index: 1000;
 }
 
-.colNav{
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 60px;
-    align-items: center;
-    background-color: var(--bgNav);
-    border-top-right-radius: 25px;
-    z-index: 10;
-    transition: all 0.3s ease 0s;
+.bottomBar div{
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border-radius: 25px;
+    transform: scale(0.8);
+    transition: all 0.3s ease-in-out;
 }
 
-.unselected{
-    color: var(--colorNav);
-    display: inline-grid;
-    text-align: center;
-    align-items: center;
-    font-size: medium;
+.bottomBar div:hover{
+    transform: scale(1);
 }
 
-.unselected:hover{
-    color: var(--navActive);
-}
-
-.unselected div{
-    display: none;
-}
-
-.selected{
-    color: var(--navActive);
-    transform: translateY(-20%);
-    display: inline-grid;
-    text-align: center;
-    align-items: center;
-    font-size: x-large;
-    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32,1.275);
-}
-
-.selected div{
-    display: block;
-    font-size: medium;
-}
-
-.selectedHide{
-    color: var(--navActive);
-    display: inline-grid;
-    text-align: center;
-    align-items: center;
-    font-size: x-large;
-    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32,1.275);
-}
-
-.selectedHide div{
-    display: block;
-    font-size: small;
-}
-
-.indicator{
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    position: absolute;
-    background-color: var(--bgNav);
-    top: -35px;
-    transition: all 0.4s ease-in;
+.bottomBar div p{
+    font-size: 10px;
+    margin: 0;
 }

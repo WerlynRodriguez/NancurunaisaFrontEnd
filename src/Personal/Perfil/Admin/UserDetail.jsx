@@ -1,13 +1,15 @@
 import { DeleteOutlined } from "@ant-design/icons";
 import { Button, DatePicker, Divider, Form, Input, Layout, Menu, message, Select, Typography } from "antd";
-import { useEffect, useState } from "react";
+import { lazy, useEffect, useState } from "react";
 import PhoneInput from "react-phone-input-2";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { User } from "../../../Models/Models";
+import { Item, User } from "../../../Models/Models";
 import moment from 'moment';
+import "../../../Utils/TextUtils.css";
 import { ActionsProviders, getaction } from "../../../Utils/ActionsProviders";
 import { ChangeStatus, Create, getById, Update } from "../../../Utils/FetchingInfo";
 import { BlockRead, ButtonSubmit, FormAvName, FormPageHeader, sectionStyle, ValDoubleName } from "../../../Utils/TextUtils";
+const AdRols = lazy(() => import("./AdRols"));
 
 const {Title} = Typography;
 
@@ -21,15 +23,17 @@ export default function UserDetail() {
     const {idUS} = useParams(); /* Params react Router fron now what is the id to want a action */
 
     //When the action is read or update, the form is loading the data
-    const [Loading,setLoading] = useState(idUS==null? false:true)
+    const [Loading,setLoading] = useState(idUS==null? false:true);
     //When the action is add, load for update and wait response from server
     const [isLoading,setloading]= useState(false);
     const [form] = Form.useForm();
 
-    const [user, setUser] = useState([]);
+    const [user, setUser] = useState(new User(null));
+
+    const [showPicker, setshowPicker] = useState(false);
 
     useEffect(() => {
-        if(ActionsProvider.isAdd){ return; }
+        if(ActionsProvider.isAdd) return; 
         FetchData();
     }, []);
 
@@ -47,23 +51,38 @@ export default function UserDetail() {
         foto
         numCel
         sexo
-        activo`;
+        activo
+        idRol{
+            idRol
+            nombreRol
+        }
+        terapeuta{
+            idTerapeuta
+        }`;
 
         getById("usuarios","idUsuario",idUS,items).then((response) => {
             if (response == "errors") return;
+            if (response.data.usuarios.items.length == 0) { 
+                message.error("No se encontró el usuario",2,()=>{
+                    //Navigate to the previous page replace
+                    Navigate("/Personal/Clinica/",{replace:true});
+                });
+                return;
+            }
 
-            setUser(response.items[0]);
+            let usuario = new User(response.data.usuarios.items[0]);
+            setUser(usuario);
             form.setFieldsValue({
-                nombres: response.items[0].nombres,
-                apellidos: response.items[0].apellidos,
-                sexo: response.items[0].sexo,
-                fechaNacimiento: moment(response.items[0].fechaNacimiento),
-                numCel: response.items[0].numCel,
-                email: response.items[0].email,
+                nombres: usuario.nombres,
+                apellidos: usuario.apellidos,
+                sexo: usuario.sexo,
+                fechaNacimiento: usuario.fechaNacimiento,
+                numCel: usuario.numCel,
+                email: usuario.email,
+                idRol: usuario.idRol ? usuario.idRol.nombreRol : "null",
             });
-
             setLoading(false);
-        });
+        })
     }
 
     const onFinish = () => {
@@ -85,21 +104,16 @@ export default function UserDetail() {
             sexo: "${form.getFieldValue("sexo")}"
             fechaNacimiento: "${moment(form.getFieldValue("fechaNacimiento")).format("YYYY-MM-DD")}"
             foto: null
-            activo: true`;
-
-        const items = "idUsuario";
+            activo: true
+            roles: [${user.idRol.idRol}]`;
+        const items = "idUsuario idRol{nombreRol} terapeuta{idTerapeuta}";
 
         Create("Usuario","usuario",vars,items).then((response) => {
-            if (response["crearUsuario"] != null) {
-                message.success("Usuario creado correctamente");
-                Navigate("/Personal/Ajustes/Admin/Usuarios");
-            } else {
-                message.error("Error al crear el usuario");
-                setloading(false);
-            }
-        }).catch((error) => {
-            message.error("Error al crear el usuario");
-            setloading(false);
+            if (response == "errors") { setloading(false); return; }
+
+            message.success("Usuario creado correctamente",2,
+            () => { Navigate("/Personal/Ajustes/Admin/Usuarios"); });
+            
         })
     }
 
@@ -112,55 +126,71 @@ export default function UserDetail() {
             fechaNacimiento: "${moment(form.getFieldValue("fechaNacimiento")).format("YYYY-MM-DD")}"
             numCel: "${form.getFieldValue("numCel")}"
             sexo: "${form.getFieldValue("sexo")}"
-            foto: null
-            activo: true`;
-        const items = "idUsuario";
+            activo: ${user.activo}
+            roles: [${user.idRol.idRol}]`;
+        const items = "idUsuario idRol{idRol} terapeuta{idTerapeuta}";
 
         Update("Usuario","usuarioInput",vars,items).then((response) => {
-            if (response["actualizarUsuario"] != null) {
-                message.success("Usuario actualizado correctamente",2).then(() => {
-                    Navigate("/Personal/Ajustes/Admin/Usuarios");
-                });
-            } else {
-                message.error("Error al actualizar el usuario");
+            if (response == "errors") { setloading(false); return; }
+
+            let data = response.data.actualizarUsuario;
+            
+
+
+            message.success("Usuario actualizado correctamente",2,
+            () => { 
+                FetchData(); 
                 setloading(false);
-            }
-        }).catch((error) => {
-            message.error("Error al actualizar el usuario");
-            setloading(false);
+            });
+
         })
     }
 
     const ChangeStatusUser = () => {
         setLoading(true);
         ChangeStatus("Usuario","idUsuarios",idUS,"activo",user.activo,"idUsuario").then((response) => {
-            if (response.actualizarEstadoUsuario != null) {
-                message.success("Usuario "+(user.activo?"deshabilitado":"habilitado") +" correctamente",2).then(() => {
-                    FetchData();
-                });
-            } else {
-                message.error("Error al actualizar el usuario");
-                setLoading(false);
-            }
-        }).catch((error) => {
-            message.error("Error al actualizar el usuario");
-            setLoading(false);
+            if (response == "errors") { setLoading(false); return; }
+
+            message.success("Usuario "+(user.activo?"deshabilitado":"habilitado") +" correctamente",2,()=>{
+                FetchData();
+            });
         })
     }
 
     //======================================================================
     //This is the menu will be displayed in the header when the action is Read or Update
     //======================================================================
-    const userMenu = (
-        <Menu 
-        style={{width:"200px",borderRadius:"20px"}}
-        //theme="dark"
-        items={[
-            {key:"item1",label:(user.activo?"Deshabilitar":"Habilitar")+" usuario",onClick:()=>{ChangeStatusUser()}},
-        ]}/>
-    );
+    const userMenu = [];
+    if (user.terapeuta) 
+        userMenu.push({
+            key:"item2",
+            label:"Ver terapeuta",
+            onClick:() => {console.log("Ver terapeuta")}
+        });
 
-    return (<div>
+    userMenu.push({
+        key:"item1",
+        label:(user.activo?"Deshabilitar":"Habilitar")+" usuario",
+        onClick:()=>{ChangeStatusUser()}
+    });
+
+    //======================================================================
+    //This is the menu Administrar Roles in mode picker
+    //======================================================================
+    if (showPicker)
+        return (
+            <AdRols 
+            picker 
+            onBack={()=>{setshowPicker(false)}}
+            onFinish={(item)=>{
+                setUser({...user,idRol:{idRol:item.id,nombreRol:item.info[0]}});
+                form.setFieldsValue({idRol:item.info[0]});
+                setshowPicker(false);
+            }}/>
+        )
+
+    return (
+    <div>
         <FormPageHeader 
         ActionProv={ActionsProvider} 
         Text="Usuarios" 
@@ -172,7 +202,8 @@ export default function UserDetail() {
         
         <FormAvName
         ActionProv={ActionsProvider} 
-        Loading={Loading} 
+        Loading={Loading}
+        Activo={user.activo}
         Pic="https://source.unsplash.com/random/800x600"
         Text={user.nombres+" "+user.apellidos}/>
         
@@ -192,7 +223,7 @@ export default function UserDetail() {
                     <Title level={4}>Información Personal</Title>
                     <Form.Item 
                     name="nombres" 
-                    label="Nombres:" rules={[{validator: (_, value) => ValDoubleName(value,"nombres")}]}>
+                    label="Nombres:" rules={[{validator: (_, value) => ValDoubleName(value,"nombre")}]}>
                         <Input 
                         type="text" 
                         maxLength={30} 
@@ -203,7 +234,7 @@ export default function UserDetail() {
                     <Form.Item 
                     name="apellidos" 
                     label="Apellidos:" 
-                    rules={[{validator: (_, value) => ValDoubleName(value,"apellidos")}]}>
+                    rules={[{validator: (_, value) => ValDoubleName(value,"apellido")}]}>
                         <Input 
                         type="text"
                         placeholder='Apellidos'/>
@@ -245,6 +276,28 @@ export default function UserDetail() {
                     </Form.Item>
                 </div>
 
+                <div style={sectionStyle}>
+                    <Title level={4}>Información Laboral</Title>
+                    
+                    <Form.Item 
+                    name="idRol" 
+                    label="Rol:"
+                    rules={[{required:true,message:"¡Seleccione el rol!"}]}>
+                        <Input 
+                        disabled
+                        type="text"
+                        placeholder="Seleccione un rol"
+                        suffix={
+                            <Button
+                            type="primary"
+                            shape="round" 
+                            onClick={()=>{setshowPicker(true)}}>
+                                    Seleccionar Rol
+                            </Button>
+                        }/>
+                    </Form.Item>
+                </div>
+
                 {ActionsProvider.isAdd?
                 <div style={sectionStyle}>
                     <Title level={4}>Información de Acceso</Title>
@@ -259,5 +312,6 @@ export default function UserDetail() {
 
             </Form>
         </Layout>
-    </div>);
+    </div>
+    );
 }

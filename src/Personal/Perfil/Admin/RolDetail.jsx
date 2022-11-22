@@ -1,3 +1,4 @@
+import "../../../Utils/TextUtils.css";
 import { DeleteOutlined } from "@ant-design/icons";
 import { Button, Card, Checkbox, Collapse, DatePicker, Divider, Form, Input, Layout, List, Menu, message, Select, Switch, Typography } from "antd";
 import { useEffect, useState } from "react";
@@ -30,12 +31,10 @@ export default function RolDetail(props){
     const [isLoading,setloading]= useState(false);
     const [form] = Form.useForm();
 
-    const [rol, setRol] = useState([]);
-    let permisos = [];
+    const [rol, setRol] = useState(new Rol(null));
     const [modules, setModules] = useState([]);
 
     useEffect(() => {
-        if(ActionsProvider.isAdd){ return; }
         FetchData();
     }, []);
 
@@ -44,29 +43,6 @@ export default function RolDetail(props){
     //======================================================================
     const FetchData = () => {
         setLoading(true);
-        const items = 
-        `idRol
-        nombreRol
-        descripcion
-        idOperacion{
-            idOperacion
-        }`;
-
-        getById("roles","idRol",idRol,items).then((response) => {
-            if (response == "errors") return;
-
-            let rol = new Rol(response.items[0]);
-            permisos = response.items[0].idOperacion[0];
-
-            setRol(rol);
-
-            form.setFieldsValue({
-                nombreRol: rol.nombreRol,
-                descripcion: rol.descripcion
-            });
-
-            setLoading(false);
-        });
 
         const ritems = `idModulo
         nombre
@@ -78,16 +54,37 @@ export default function RolDetail(props){
             activo
         }`;
 
-        const searchQuery = `
-        or:[
-            {nombre: {contains:"${""}"}}
-        ]
-        `;
+        const searchQuery = `nombre: {contains:"${""}"}`;
 
         getByPag("modulos", ritems, 0, 10, searchQuery, "nombre: ASC").then((mresponse) => {
             if (mresponse == "errors") return;
 
             setModules(mresponse.items);
+
+            const items = 
+            `idRol
+            nombreRol
+            descripcion
+            activo
+            idOperacion{
+                idOperacion
+                idModulo
+            }`;
+
+            if (ActionsProvider.isAdd){ setLoading(false); return; }
+
+            getById("roles","idRol",idRol,items).then((response) => {
+                if (response == "errors") return;
+
+                let rol = new Rol(response.data.roles.items[0]);
+                rol.orderModules();
+                setRol(rol);
+
+                form.setFieldsValue({
+                    nombreRol: rol.nombreRol,
+                    descripcion: rol.descripcion
+                });
+            }).finally(() => { setLoading(false); } );
         });
     }
 
@@ -101,22 +98,60 @@ export default function RolDetail(props){
     }
 
     const UpdateRol = () => {
-
+        const permisos = rol.getArrayPermisos();
         const vars = `
             idRol: ${idRol}
             nombreRol: "${form.getFieldValue("nombreRol")}"
             descripcion: "${form.getFieldValue("descripcion")}"
+            activo: ${rol.activo}
+            operaciones: [${permisos}]
             `;
         const items = "idRol";
 
         Update("Rol","rolInput",vars,items).then((response) => {
-            if (response == "errors") return;
+            if (response == "errors") { setloading(false); return; }
 
-            message.success("Usuario actualizado correctamente",2).then(() => {
+            message.success("Rol actualizado correctamente",2).then(() => {
+                FetchData();
+            });
+        });
+    }
+
+    const AddRol = () => {
+        const permisos = rol.getArrayPermisos();
+        const vars = `
+            nombreRol: "${form.getFieldValue("nombreRol")}"
+            descripcion: "${form.getFieldValue("descripcion")}"
+            activo: true
+            operaciones: [${permisos}]
+            `;
+        const items = "idRol";
+
+        Create("Rol","rolInput",vars,items).then((response) => {
+            if (response == "errors") { setloading(false); return; }
+
+            message.success("Rol creado correctamente",2).then(() => {
                 Navigate("/Personal/Ajustes/Admin/Roles");
             });
         });
     }
+
+    const onSwitchPerm = (checked, item, module) => {
+        if (checked) {
+            rol.addPermiso(item.idOperacion, module.idModulo);
+        } else {
+            rol.removePermiso(item.idOperacion, module.idModulo);
+        }
+    }
+
+    const userMenu = (
+        <Menu style={{width:"200px",padding:"0px"}}>
+            <Menu.Item key="2" style={{display:true?"":"none"}}>
+            <Button  onClick={()=>{deleteTera()}} 
+            style={{width:"100%",color:"red"}}>Eliminar</Button>
+            </Menu.Item>
+        </Menu>
+        );
 
     return (<div>
         <FormPageHeader 
@@ -130,6 +165,7 @@ export default function RolDetail(props){
         <FormAvName
         ActionProv={ActionsProvider} 
         Loading={Loading} 
+        Activo={rol.activo}
         Pic=""
         Text={rol.nombreRol}/>
         
@@ -189,16 +225,13 @@ export default function RolDetail(props){
                                     xl: 6,
                                   }}
                                 renderItem={item => (<>
-                                    <h4>{item.nombre}</h4>
+
+                                    <h4>{item.nombre+" "+item.idOperacion}</h4>
                                     <h5>{item.descripcion}</h5>
-                                    <Form.Item
-                                    name={item.idOperacion}
-                                    valuePropName="checked"
-                                    initialValue={permisos.some((op) => op == module.operacion.idOperacion)}
-                                    noStyle>
-                                        <Switch
-                                        />
-                                    </Form.Item>
+                                    <Switch 
+                                    defaultChecked={rol.hasPermiso(item.idOperacion, module.idModulo)}
+                                    onChange={(checked) => {onSwitchPerm(checked,item,module)}}/>
+
                                 </>)}/>
 
                             </Collapse.Panel>
@@ -207,7 +240,6 @@ export default function RolDetail(props){
                 </div>
 
                 <ButtonSubmit ActionProv={ActionsProvider} isLoading={isLoading}/>
-
             </Form>
         </Layout>
     </div>);

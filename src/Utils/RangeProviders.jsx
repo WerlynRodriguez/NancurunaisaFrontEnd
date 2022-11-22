@@ -1,45 +1,96 @@
+import { message } from "antd";
+import { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
+import LoadPage from "../Personal/Perfil/LoadPage";
+import { getById } from "./FetchingInfo";
 
-export function getMyRange() {
-    /*const user = JSON.parse(localStorage.getItem('user'));
-    return user.Roll;*/
-    return Ranges.Owner;
-}
+export function OnlyAdmin(){
+    const location = useLocation();
+    const rangeProvider = new RangeProvider();
+    const [value,setValue] = useState(null);
 
-function includes(array){
-    const myRange = getMyRange();
-    for (let index = 0; index < array.length; index++) {
-        if (array[index] == myRange){ return true }
+    useEffect(() => {
+        setValue(rangeProvider.matchRol(1))
+    }, []);
+
+    switch (value) {
+        case true:
+            return(<Outlet/>);
+        case false:
+            return (<Navigate to= "/Personal/Ajustes" state={{from:location}} replace/>);
+        default:
+            return(<LoadPage/>);
     }
-    return false;
 }
-
-export function AllowFunction(Permited){
-    if (includes(Permited)){ 
-        return true 
+// Citas
+// : 
+// (4) ['Añadir', 'Editar', 'Ver', 'Listar']
+// Facturas
+// : 
+// (4) ['Añadir', 'Editar', 'Ver', 'Listar']
+// Pacientes
+// : 
+// (5) ['Añadir', 'Editar', 'Ver', 'Listar', 'Cambiar estado']
+// Promociones
+// : 
+// (5) ['Añadir', 'Editar', 'Ver', 'Listar', 'Cambiar estado']
+// Sucursales
+// : 
+// (5) ['Añadir', 'Editar', 'Ver', 'Listar', 'Cambiar estado']
+// Terapeutas
+// : 
+// (5) ['Añadir', 'Editar', 'Ver', 'Listar', 'Cambiar estado']
+// Terapias
+// : 
+// (5) ['Añadir', 'Editar', 'Ver', 'Listar', 'Cambiar estado']
+export class RangeProvider {
+    constructor(){
+        this.permisos = {};
     }
-    return false
-}
 
-export function DenyFunction(Exclude){
-    if (includes(Exclude)){ 
-        return false 
+    getRolUser(){
+        const user = JSON.parse(localStorage.getItem('user'));
+        return JSON.parse(user.permisos)[0];
+
     }
-    return true
-}
 
-export function Allow(Permited){
-    if (includes(Permited.Permited)){ 
-        return (<Outlet/>) 
+    async loadPermisos(onSuccess){
+        const rol = this.getRolUser();
+            
+        const items = `
+        idOperacion{
+            nombre
+            idModuloNavigation{
+            nombre
+            
+            }
+        }`;
+
+        getById("roles","idRol",rol.idRol,items).then((response) => {
+            if (response == "erros") return
+            let perm = {};
+
+            response.data.roles.items[0].idOperacion.forEach((element) => {
+                if (perm[element.idModuloNavigation.nombre] == null){
+                    perm[element.idModuloNavigation.nombre] = [];
+                }
+                perm[element.idModuloNavigation.nombre].push(element.nombre);
+            });
+
+            this.permisos = perm;
+            onSuccess();
+        });
     }
-    return (<Navigate to="/Personal/Clinica" state={{from:useLocation()}} replace/>)
-}
 
-export function Deny(Exclude){
-    if (includes(Exclude.Exclude)){ 
-        return (<Navigate to="/Personal/Clinica" state={{from:useLocation()}} replace/>) 
+    verifyPermiso(nombrePermiso,module){
+        if (this.permisos == null) return false;
+        if (this.permisos[module] == null) return false;
+        return this.permisos[module].includes(nombrePermiso);
     }
-    return (<Outlet/>)
-}
 
-export const Ranges={ Owner:0, Manager:1,Employ:2,Invited:3 }
+    matchRol(idRol){
+        const rol = this.getRolUser();
+        if (rol == null) return false;
+        return rol.idRol == idRol;
+    }
+}

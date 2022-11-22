@@ -20,18 +20,6 @@ export default function MultiSelectList(props) {
 
     const {picker, multi, dataPicked, onBack, onFinish} = pickerSettings;
 
-    let isPicker = false;
-    let isMultiPicker = false;
-
-    useEffect(() => {
-        if (picker){
-            isPicker = true;
-            if (multi){
-                isMultiPicker = true;
-            }
-        }
-    }, [loading]);
-
     //Add an item in selection mode
     //item is for Multidata, index is for Items
     const addMSItem = (item, index) => {
@@ -44,10 +32,12 @@ export default function MultiSelectList(props) {
     const removeMSItem = (itemA, index) => {
         setMultiData(multiData.filter(item => item.id != itemA.id));
         changeSelectedItem(index, false);
-        if (multiData.length == 1) {
-            setMultiData([]);
+
+        if (multiData.length != 1) return;
+        setMultiData([]);
+        
+        if (!multi)
             setSelectionMode(false);
-        }
     }
 
     // Change the value of selected in list of selected item by index
@@ -71,8 +61,8 @@ export default function MultiSelectList(props) {
     // and if it is in multi selection mode, in normal mode and in picker mode
     //======================================================================
     const onclick=(item,index,Click)=>{
-        if(isPicker){
-            if(isMultiPicker){
+        if(picker){
+            if(multi){
                 //If it is a multi picker mode, it will add or remove the item from the list
                 if(!selectionMode) { setSelectionMode(true); }
                 setMultiSelected(item,index);
@@ -97,7 +87,7 @@ export default function MultiSelectList(props) {
     //======================================================================
     const onLongPress = (item,index) => {
         //If is in picker mode but isn't a multi picker mode, the item is selected and the list is closed
-        if(isPicker && !isMultiPicker){
+        if(picker && !multi){
             onFinish(item);
             return;
         }
@@ -113,24 +103,14 @@ export default function MultiSelectList(props) {
     }
 
     return (
-    <List
-    size="small"
-    style={{width:"100%",marginTop:"40px"}}
-    itemLayout="horizontal" 
-    loading={loading} 
-    grid={{ gutter: 16, xs: 1, sm: 1, md: 2,lg: 2,xl: 3,xxl: 3 }}
-    dataSource={items} 
-    renderItem={(item,index) => 
-        renderItem(item,index,onclick,onLongPress,selectionMode)
-    }/>
-    // renderItem={(item,index) => (
-
-    //     <TerapeutaItem
-    //     item={item}
-    //     onClick={(item)=>{onclick(item,index)}}
-    //     onLongPress={(item)=>{onLongPress(item,index)}} 
-    //     mulSelMode={selectionMode}/>
-    // )
-    //}
+        <List
+        style={{width:"100%",marginTop:"40px"}}
+        itemLayout="horizontal" 
+        loading={loading} 
+        grid={{ gutter: 16, xs: 1, sm: 1, md: 2,lg: 2,xl: 3,xxl: 3 }}
+        dataSource={items} 
+        renderItem={(item,index) => 
+            renderItem(item,index,onclick,onLongPress,selectionMode)
+        }/>
     )
 }

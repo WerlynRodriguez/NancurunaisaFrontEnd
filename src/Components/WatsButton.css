@@ -12,6 +12,7 @@
     position: relative;
     height: 50px;
     padding-right: 3.3em;
+    cursor: pointer;
 }
 
 .iconWats{

@@ -1,52 +1,36 @@
 import React, { useState } from 'react';
-import { Row, Col } from 'antd';
+import { Row, Col, Menu } from 'antd';
 import {
     HomeOutlined,
     SettingOutlined,
     CalendarOutlined,
     HeartOutlined,
-    EyeInvisibleOutlined,
-    EyeOutlined,
-    PieChartOutlined
+    PieChartOutlined,
+    CalendarFilled,
+    HeartFilled,
+    HomeFilled,
+    PieChartFilled,
+    SettingFilled
 } from '@ant-design/icons';
+import { useLocation, useNavigate} from "react-router-dom";
 import "./BottomBar.css";
-import { useNavigate} from "react-router-dom";
+import { getaction } from '../../Utils/ActionsProviders';
 
-function BottomBar (){
+export default function BottomBar (){
     let Navigate = useNavigate();
-    const Unselect = "unselected";
-    const Selected = "selected";
-    const colapsedNav = "colNav"
-    const [actualIndex,setActualIndex] = useState(2);
-    const [actualMul,setActualMul] = useState(2);
-    const [menu,setmenu] = useState([
-        {mul: 6, sel: false},
-        {mul: 3, sel: false},
-        {mul: 2, sel: true}, //Indicates Home is selected
-        {mul: 1.5, sel: false},
-        {mul: 1.2, sel: false}
-    ]);
-    const [iscollapsed,setCollapsed] = useState(
-        localStorage.getItem("Interfaz_HideBottomBar") == "true" ? true:false);
+    const local = useLocation();
 
+    const page = getaction(local.pathname, 2);
+    const pages = {"Citas":0, "Clinica":1, "Home":2, "Reportes":3, "Ajustes":4};
+
+    const [selected, setSelected] = useState(pages[page]);
 
     //=========================================================================
     //This function is called when the user clicks on a button in the bottom bar
     //=========================================================================
-    const handleClick = (index) =>{
-        
-        if(index != actualIndex){
-            const aux = menu;
-
-            aux[index].sel = true;
-            aux[actualIndex].sel = false;
-
-            setActualIndex(index);
-            setActualMul(aux[index].mul);
-            setmenu(aux);
-        }
-
-        switch(index){
+    const handleClick = (key) =>{
+        setSelected(key);
+        switch(key){
             case 0:
                 Navigate("/Personal/Citas");
                 break;
@@ -68,74 +52,54 @@ function BottomBar (){
         
     }
 
+    const items = [
+        {
+            key: 0,
+            label: 'Citas',
+            icon: <CalendarOutlined/>,
+            iconS: <CalendarFilled/>
+        },
+        {
+            key: 1,
+            label: "Clinica",
+            icon: <HeartOutlined/>,
+            iconS: <HeartFilled/>
+        },
+        {
+            key: 2,
+            label: "Home",
+            icon: <HomeOutlined/>,
+            iconS: <HomeFilled/>
+        },
+        {
+            key: 3,
+            label: "Reportes",
+            icon: <PieChartOutlined/>,
+            iconS: <PieChartFilled/>
+        },
+        {
+            key: 4,
+            label: "Ajustes",
+            icon: <SettingOutlined/>,
+            iconS: <SettingFilled/>
+        },
+    ]
+
     return(
-        <Row 
-        className={iscollapsed?colapsedNav:'nav'}>
-
-            <div 
-            style={{
-                marginLeft:`calc((100%/${actualMul}) - 40px)`,
-                display:iscollapsed?"none":""}} 
-            className='indicator'/>
-
-            <Col 
-            onClick={() => {setCollapsed(!iscollapsed)}} 
-            span={iscollapsed? 24:2} 
-            className={iscollapsed? "selectedHide":Unselect}>
-                {iscollapsed?<EyeOutlined/>:<EyeInvisibleOutlined/>} 
-                <div>Menú</div> 
-            </Col>
-
-            <Col 
-            style={{display:iscollapsed?"none":""}} 
-            onClick={() => handleClick(0)} 
-            className={menu[0].sel ? Selected : Unselect} 
-            span={4}>
-                <CalendarOutlined />
-                <div>Citas</div>                
-            </Col>
-
-            <Col 
-            style={{display:iscollapsed?"none":""}} 
-            onClick={() => handleClick(1)} 
-            className={menu[1].sel ? Selected : Unselect} 
-            span={4}>
-                <HeartOutlined />
-                <div >Clinica</div>
-            </Col>
-
-            <Col 
-            style={{display:iscollapsed?"none":""}} 
-            onClick={() => handleClick(2)} 
-            className={menu[2].sel ? Selected : Unselect} 
-            span={4}>
-                <HomeOutlined/>
-                <div >Inicio</div>
-            </Col>
-
-            <Col 
-            style={{display:iscollapsed?"none":""}} 
-            onClick={() => handleClick(3)} 
-            className={menu[3].sel ? Selected : Unselect} 
-            span={4}>
-                <PieChartOutlined />
-                <div >Reportes</div>
-            </Col>
-
-            <Col 
-            style={{display:iscollapsed?"none":""}} 
-            onClick={() => handleClick(4)} 
-            className={menu[4].sel ? Selected : Unselect} 
-            span={4}>
-                <SettingOutlined />
-                <div >Ajustes</div>
-            </Col>
-
-            <Col 
-            style={{display:iscollapsed?"none":""}} 
-            span={2}/>
-        </Row>
+        <div className='bottomBar'>
+            {items.map((item, index) => ( 
+                <div 
+                key={"NavBarOption"+index}
+                style={selected === index ? 
+                    {backgroundColor: "white", color: "#212121", transform: "scale(1.0)"}
+                    :
+                    {}
+                }
+                onClick={()=>{handleClick(item.key)}}>
+                    {selected === index ? item.iconS : item.icon}
+                    <p>{item.label}</p>
+                </div>
+             ))}
+        </div>
     );
 }
-
-export default BottomBar

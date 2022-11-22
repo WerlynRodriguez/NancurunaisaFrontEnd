@@ -1,5 +1,5 @@
 import React, {useState,useEffect} from 'react';
-import { ActionsProviders,getaction} from '../../../Utils/ActionsProviders';
+import { ActionsProviders,FormActions,getaction} from '../../../Utils/ActionsProviders';
 import {Typography, Skeleton, Layout, Select, Form, Image, Button, Dropdown, Avatar} from 'antd';
 import {Input,DatePicker,Divider, Upload,message,Menu} from 'antd';
 import "../../../Utils/TextUtils.css";
@@ -12,10 +12,13 @@ import Clock from '../../../Components/Clock';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 
-import { FormPageHeader, sectionStyle, BlockRead, FormAvName, ValDoubleName, ButtonSubmit, getFirstWord } from '../../../Utils/TextUtils';
+import { FormPageHeader, sectionStyle, BlockRead, FormAvName, ValDoubleName, ButtonSubmit, getFirstWord, MapSelectedItems } from '../../../Utils/TextUtils';
+import SelectedItem from "../../../Components/Items/SelectedItem";
 import ImgCrop from 'antd-img-crop';
-import { Terapeuta } from '../../../Models/Models';
-import { getById } from '../../../Utils/FetchingInfo';
+import { Item, Terapeuta} from '../../../Models/Models';
+import { getById, Update } from '../../../Utils/FetchingInfo';
+import Sucursales from '../Sucursal/Sucursales';
+import Terapias from '../Terapia/Terapias';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -32,12 +35,11 @@ export default function TerapeutaDetail(){
   var isInModal = false;
   const [form] = Form.useForm();
 
-  var infoTerapeuta = new Terapeuta(null);
+  const [terata, setTerata] = useState(new Terapeuta(null));
 
-  const [EntradaHora,setEntradaHora] = useState("09:00");
-  const [SalidaHora,setSalidaHora]= useState("18:00");
-  const [fotoPerfil,setFotoPerfil] = useState({imageFile:null,imageSrc:null});
-  const [ActSucur,setActSucur] = useState("Rafaela Herrera");
+  //=============================================
+  // 0: Picker Sucursal, 1: Picker Terapia
+  const [showPicker, setshowPicker] = useState(-1);
 
   const OptionDayFree = [
     <Option key={1} value={1}>Lunes</Option>,
@@ -85,87 +87,91 @@ export default function TerapeutaDetail(){
     }
     diaLibre{
       idDia
+    }
+    idTerapia {
+      idTerapia
+      nombreTerapia
     }`;
 
     getById("terapeutas","idTerapeuta",idTA,items).then((response) => {
       if (response == "errors") return;
-
-      infoTerapeuta = new Terapeuta(response.items[0]);
+      
+      let infoTerapeuta = new Terapeuta(response.data.terapeutas.items[0]);
+      setTerata(infoTerapeuta);
       
       form.setFieldsValue({
         nombres: infoTerapeuta.nombres,
         apellidos: infoTerapeuta.apellidos,
-        fechaNacimiento: moment(infoTerapeuta.fechaNacimiento),
+        fechaNacimiento: infoTerapeuta.fechaNacimiento,
         sexo: infoTerapeuta.sexo,
         numCel: infoTerapeuta.numCel,
         email: infoTerapeuta.email,
-        horaEntrada: moment(infoTerapeuta.horaEntrada).format("HH:mm"),
-        horaSalida: moment(infoTerapeuta.horaSalida).format("HH:mm"),
+        horaEntrada: infoTerapeuta.horaEntrada,
+        horaSalida: infoTerapeuta.horaSalida,
+        idSucursal: infoTerapeuta.idSucursal.nombreSucursal,
+        diaLibre: infoTerapeuta.getDiasLibres(),
       });
 
       setLoading(false);
     });
   }
 
-  const DeAcTerata =(DeAc)=>{
-    var data = dataTeraTa();
-    data.activo = DeAc;
-    UpdateTeraTa(idTA,data).then((result)=>{
-      console.log(result);
-      if (result.ok){
-        message.success("Terapeuta Modificado",1).then(()=>{
-          setloading(false);
-          Navigate(-1);
-        })
-      }else{message.error("No se pudo Modificar",2);setloading(false);}
-    })
-  }
+  const userMenu = [
+    {key:"item1", label:"Ver Usuario", 
+    onClick:()=>{Navigate("/Personal/Ajustes/Admin/Usuario/"+FormActions.Update+"/"+terata.idUsuario)}},
+  ];
 
-  const userMenu = (
-      <Menu style={{width:"200px",borderRadius:"20px"}}>
-        <Menu.Item key="1">
-          <Button type='primary' onClick={()=>{DeAcTerata(Terapeuta.activo)}} danger 
-          style={{width:"100%",borderBottomLeftRadius:"20px",borderBottomRightRadius:"20px"}}>
-            {Terapeuta.activo == true? "Desactivar":"Activar"}
-            </Button>
-        </Menu.Item>
-      </Menu>
-    );
-
-  /* * * * * * * * * * * * * * * * * * *  */
-  /*This Functions are Only in Action ADD */
-  /* * * * * * * * * * * * * * * * * * *  */
   const onFinish = () =>{
-    if(isLoading || isInModal) {return;}
     setloading(true);
     if (ActionsProvider.isAdd) {
-      var data = dataTeraTa();
-      CreateTeraTa(data).then((result)=>{
-        console.log(result);
-      /*if (result['status'] === 'ok') {
-        message.success("Terapeuta Añadido",1).then(()=>{
-          setloading(false);
-          Navigate(-1);
-        })
-      }else{message.error("No se pudo añadir",2);setloading(false);}*/
-    })
-    }else{
-      var data = dataTeraTa();
-      UpdateTeraTa(idTA,data).then((result)=>{
-        console.log(result);
-        if (result.ok){
-          message.success("Terapeuta Modificado",1).then(()=>{
-            setloading(false);
-            Navigate(-1);
-          })
-        }else{message.error("No se pudo Modificar",2);setloading(false);}
-      })
+  
+    } else {
+      TerataUpdate();
+    }
+  }
+
+  const TerataUpdate = () => {
+    const vars = terata.toString(form.getFieldsValue());
+    
+    Update("Terapeuta","terapeutaInput",vars,"idTerapeuta").then((response) => {
+      if (response == "errors") { setloading(false); return; }
+
+      message.success("Terapeuta actualizada",1,() => {
+          Navigate("/Personal/Clinica/Terapeutas");
+      });
+    });
+  }
+
+  //======================================================================
+  //This is the menu Administrar Roles in mode picker
+  //======================================================================
+  if (showPicker != -1) {
+    switch (showPicker) {
+      case 0:
+        return <Sucursales
+              picker 
+              onBack={()=>{setshowPicker(-1)}}
+              onFinish={(item)=>{
+                  terata.idSucursal.idSucursal = item.id;
+                  form.setFieldsValue({idSucursal:item.info[0]});
+                  setshowPicker(-1);
+              }}/>
+      case 1:
+        return <Terapias
+              picker
+              multi
+              dataPicked={terata.idTerapia}
+              onBack={()=>{setshowPicker(-1)}}
+              onFinish={(item) => {
+                terata.idTerapia = item;
+                setshowPicker(-1);
+              }}/>
+      default:
+        break;
     }
   }
 
   return(<div>
-    <BlockRead 
-    Show={false}/>
 
     <FormPageHeader 
     ActionProv={ActionsProvider} 
@@ -179,8 +185,8 @@ export default function TerapeutaDetail(){
     <FormAvName 
     ActionProv={ActionsProvider} 
     Loading={Loading} 
-    Pic={Terapeuta.fotoPerfil} 
-    Text={Terapeuta.nombres+" "+Terapeuta.apellidos}/>
+    Pic={terata.fotoPerfil} 
+    Text={terata.nombres+" "+terata.apellidos}/>
     
     <Layout 
     className='ContentLayout' 
@@ -192,9 +198,9 @@ export default function TerapeutaDetail(){
 
       <Clock 
       visible={!ActionsProvider.isAdd} 
-      entrada={EntradaHora} 
-      salida={SalidaHora} 
-      sucursal={ActSucur}/>        
+      entrada={terata.horaEntrada} 
+      salida={terata.horaSalida}
+      sucursal={terata.idSucursal ? terata.idSucursal.nombreSucursal : "No asignado"}/>        
       
       <Form 
       onFinish={()=>{onFinish()}} 
@@ -204,7 +210,6 @@ export default function TerapeutaDetail(){
       style={{marginTop:"25px",maxWidth:"600px",width:"100%"}}>
 
         <div style={sectionStyle}>
-
           <Title level={4}>Información Personal</Title>
 
           <Form.Item 
@@ -218,7 +223,6 @@ export default function TerapeutaDetail(){
           </Form.Item>
 
           <Divider/>
-
           <Form.Item 
           name="apellidos" 
           label="Apellidos:" 
@@ -231,7 +235,6 @@ export default function TerapeutaDetail(){
           </Form.Item>
 
           <Divider/>
-
           <Form.Item 
           name="fechaNacimiento"
           label="Fecha de nacimiento:"  
@@ -243,7 +246,6 @@ export default function TerapeutaDetail(){
           </Form.Item>
 
           <Divider/>
-
           <Form.Item 
           name="sexo" 
           label="Género:"
@@ -257,7 +259,6 @@ export default function TerapeutaDetail(){
         </div>
         
       <div style={sectionStyle}>
-
         <Title level={4}>Información de Contacto</Title>
 
         <Form.Item 
@@ -270,7 +271,6 @@ export default function TerapeutaDetail(){
         </Form.Item>
 
         <Divider/>
-
         <Form.Item 
         name="email" 
         label="Correo Electrónico:"
@@ -283,23 +283,9 @@ export default function TerapeutaDetail(){
       </div>
         
       <div style={sectionStyle}>
-
         <Title level={4}>Información Laboral</Title>
 
-        <Form.Item 
-        name="idRol" 
-        label="Rol:" 
-        rules={[{required:true,message:"¡Seleccione el Rol!"}]}>
-          <Select disabled>
-            <Option value="1">Popietario</Option>
-            <Option value="2">Manager</Option>
-            <Option value="3">Terapeuta</Option>
-            <Option value="4">Invitado</Option>
-          </Select>
-        </Form.Item>
-
         <Divider/>
-
         <Form.Item 
         name="horaEntrada" 
         label="Horario Entrada">
@@ -308,6 +294,7 @@ export default function TerapeutaDetail(){
           style={{width:"40%"}}/>
         </Form.Item>
 
+        <Divider/>
         <Form.Item 
         name="horaSalida" 
         label="Horario Salida">
@@ -317,19 +304,8 @@ export default function TerapeutaDetail(){
         </Form.Item>
 
         <Divider/>
-
-        {/* <Form.Item 
-        label="Sucursal:">
-          {ActSucur}
-          <PickerSucursal 
-          onFocus={(sta)=>{isInModal=sta}} 
-          onChange={(id,name)=>{setActSucur(name)}}/>
-        </Form.Item> */}
-        
-        <Divider/>
-
-        {/* <Form.Item 
-        name="FreeDay" 
+        <Form.Item 
+        name="diaLibre" 
         label="Dia Libre:"
         rules={[{required:true,message:"¡Seleccione un dia!"}]}>
           <Select 
@@ -340,15 +316,58 @@ export default function TerapeutaDetail(){
           placeholder="Dias libre">
             {OptionDayFree}
           </Select>
-        </Form.Item> */}
+        </Form.Item>
         
-        </div>
+        <Divider/>
+        <Form.Item 
+        name="idSucursal" 
+        label="Sucursal:"
+        rules={[{required:true,message:"¡Seleccione una sucursal!"}]}>
+            <Input 
+            disabled
+            type="text"
+            placeholder="Seleccione una sucursal"
+            suffix={
+                <Button
+                type="primary"
+                shape="round" 
+                onClick={()=>{setshowPicker(0)}}>
+                        Seleccionar Sucursal
+                </Button>
+            }/>
+        </Form.Item>
+      </div>
 
-        <ButtonSubmit 
-        ActionProv={ActionsProvider} 
-        isLoading={isLoading}/>
+      <div style={sectionStyle}>
+        <Title level={4}>Especialidades</Title>
+
+        <MapSelectedItems
+        data={terata.idTerapia} 
+        itemRender={(item,index)=>(
+
+          <SelectedItem
+          key={index}
+          index={index}
+          item={item} 
+          onClick={(id,index)=>{}} 
+          />)}
+        />
+
+        <br/>
+        <Button
+        type="primary"
+        shape="round" 
+        onClick={()=>{setshowPicker(1)}}>
+                Seleccionar Terapias
+        </Button>
+      </div>
+
+      <ButtonSubmit 
+      ActionProv={ActionsProvider} 
+      isLoading={isLoading}/>
         
       </Form>
+
     </Layout>
     </div>)
 }

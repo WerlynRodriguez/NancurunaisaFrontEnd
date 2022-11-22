@@ -13,10 +13,15 @@ function RangeDate(min,max,today){
         if (Number(hourmin[0]) == today.getHours() || Number(hourmax[0]) == today.getHours()){
             if (Number(hourmin[1]) <= today.getMinutes() && Number(hourmax[1]) <= today.getMinutes()){
                 return true;
-            }else return false;
-        } else return true;
+            }
+            else 
+                return false;
+        } 
+        else 
+            return true;
     }
-    else return false;
+    else 
+        return false;
 }
 
 export default function ClockShow(props){
@@ -51,7 +56,7 @@ export default function ClockShow(props){
             <Col 
             span={4} 
             className="DayNight" 
-            style={{backgroundImage:`url(${isday?day:night})`}} />
+            style={{backgroundImage:`url(${isday ? day : night})`}} />
 
             <Col 
             span={18} 

@@ -10,7 +10,7 @@ import { ChangeStatus } from "../../../Utils/FetchingInfo";
 
 export default function AdRols(props){
     let Navigate = useNavigate();
-  const {picker, multi, dataPicked, onBack, onFinish} = props;
+    const {picker, multi, dataPicked, onBack, onFinish} = props;
 
     const varsToFetch = (search) => {
         //const filterActivo = Filters.Activo!="All"? `{activo:{eq:${Filters.Activo}}}`:"";
@@ -32,7 +32,7 @@ export default function AdRols(props){
         }
     }
 
-    const adapter = (data) => {
+    const adapter = (data,multidata) => {
         return data.map((elemnt) => {
             return new Item(
                 elemnt.idRol,
@@ -40,8 +40,7 @@ export default function AdRols(props){
                 elemnt.descripcion],
                 "",
                 true,
-                false,
-            );
+                multidata.find((item) => item.id == elemnt.idRol));
         })
     }
 
@@ -57,7 +56,7 @@ export default function AdRols(props){
     <PageList
     title="Roles"
     varsToFetch={(search) => varsToFetch(search)}
-    adapter={(data) => adapter(data)}
+    adapter={adapter}
     renderItem={(item,index,onclick,onLongPress,selectionMode) => (
 
       <TerapeutaItem

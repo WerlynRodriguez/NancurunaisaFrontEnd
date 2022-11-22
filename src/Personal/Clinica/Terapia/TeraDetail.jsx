@@ -5,120 +5,112 @@ import "../../../Utils/TextUtils.css";
 import { getaction, ActionsProviders } from '../../../Utils/ActionsProviders';
 import { BlockRead, ButtonSubmit, FormAvName, FormPageHeader, sectionStyle } from '../../../Utils/TextUtils';
 import { NIOConvUSD, RateUSDNIO, USDConvNIO } from '../../../Utils/Calwulator';
+import { Terapia } from '../../../Models/Models';
+import { ChangeStatus, Create, getById, Update } from '../../../Utils/FetchingInfo';
 const { Title } = Typography;
 
 export default function TeraDetail(){
     let Navigate = useNavigate();
     const local = useLocation();/* What is my url */
-    const ActionsProvider = new ActionsProviders(getaction(local.pathname));/*Actions crud*/
+    const ActionsProvider = new ActionsProviders(getaction(local.pathname,4));/*Actions crud*/
     const {idTE} = useParams(); /* Params react Router fron now what is the id to want a action */
 
     const [Loading,setLoading] = useState(idTE==null? false:true);/*Fetching terapeuta info */
     const [isLoading,setloading]= useState(false);/*For Add teratas */
     const [form] = Form.useForm();
 
-    const [Terapia,setTerapia] = useState([]);/* All terapeuta info after fetching */
-
-    const [PSC,setPSC] = useState(0);
-    const [PSD,setPSD] = useState(0);
-    const [PDC,setPDC] = useState(0);
-    const [PDD,setPDD] = useState(0);
+    const [Terap,setTerapia] = useState(new Terapia(null));
+    //Conversiones de monedas Local y Domicilio
+    const [convL,setConvL] = useState(0);
+    const [convD,setConvD] = useState(0);
 
     /* * * * * * * * * * * * * * * * * * *  */
     /*This Functions are Only in Action UPDATE */
     /* * * * * * * * * * * * * * * * * * *  */
     useEffect(() => {
-        if (ActionsProvider.isAdd) { return; } 
+        if (ActionsProvider.isAdd) return; 
         TeraGet();
     },[])
 
         
     const TeraGet = () =>{
-        // GetByIdTera(idTE).then((result)=>{
-        //     setTerapia(result);
+        setLoading(true);
+        const items = `idTerapia
+        nombreTerapia
+        duracion
+        precioDomicilio
+        precioLocal
+        activo
+        `;
 
-        //     setPSC(USDConvNIO(parseFloat(result.precioLocal)));//Precio Sucursal Cordoba
-        //     setPDC(USDConvNIO(parseFloat(result.precioDomicilio).toFixed(2)));//Precio Domicilio Cordoba
-
-        //     setPSD(parseFloat(Number(result.precioLocal)));
-        //     setPDD(parseFloat(Number(result.precioDomicilio).toFixed(2)));
-
-        //     setLoading(false);
-
-        //     form.setFieldsValue({
-        //         nombreTerapia: result.nombreTerapia,
-        //         duracion: result.duracion
-        //     });
-
-        //     form.resetFields();
-        // }).catch((error)=>{
-        //     message.error("Hubo un error",2);
-        //     setloading(false);
-        //     Navigate(-1);
-        // })
+        getById("terapia","idTerapia",idTE,items).then((data)=>{
+            if(data == "errors") return;
+            
+            let tera = new Terapia(data.data.terapia.items[0]);
+            setTerapia(tera);
+            form.setFieldsValue({
+                nombreTerapia:tera.nombreTerapia,
+                duracion:tera.duracion,
+                precioDomicilio:tera.precioDomicilio,
+                precioLocal:tera.precioLocal,
+            });
+            setConvL(USDConvNIO(tera.precioLocal));
+            setConvD(USDConvNIO(tera.precioDomicilio));
+            setLoading(false);
+            setloading(false);
+        })
     }
 
     const onFinish=()=>{
         setloading(true);
         if (ActionsProvider.isAdd) {
-            var data = {
-                "nombreTerapia": form.getFieldValue("Nombre"),
-                "duracion": form.getFieldValue("Dur"),
-                "precioDomicilio": PDD,
-                "precioLocal": PSD,}
-            // CreateTera(data).then((result)=>{
-            //     message.success("Terapia Añadida",1).then(()=>{
-            //     setloading(false);
-            //     Navigate(-1);
-            //     })
-            // }).catch((error)=>{
-            //     message.error("Hubo un error"+error,2);
-            //     setloading(false);
-            // });
+            AddTera();
         }else{
-            var data = {
-                "idTerapia": idTE,
-                "nombreTerapia": form.getFieldValue("Nombre"),
-                "duracion": form.getFieldValue("Dur"),
-                "precioDomicilio": PDD,
-                "precioLocal": PSD,
-                "idCita":[]}
-            // UpdateTera(data,idTE).then((result)=>{
-            //       message.success("Terapia Modificada",1).then(()=>{
-            //         setloading(false);
-            //         Navigate(-1);
-            //       })
-            //   }).catch((error)=>{
-            //     console.log(error);
-            //         message.error("Hubo un error"+error,2);
-            //         setloading(false);
-            //     })
+            UpdateTera();
         }
     }
 
-    const deleteTera =()=>{
-            // DeleteTera(idTE).then((result)=>{
-            //     message.success("Terapia Eliminada",1).then(()=>{
-            //     setloading(false);
-            //     Navigate(-1);
-            //     })
-            // }).catch((error)=>{
-            //     message.error("Hubo un error"+error,2);
-            //     setloading(false);
-            // })
+    const AddTera = () => {
+        setloading(true);
+        const vars = Terap.toString(form.getFieldsValue());
+
+        Create("Terapia","terapiaInput",vars,"idTerapia").then((data)=>{
+            if(data == "errors") { setloading(false); return;}
+            message.success("Terapia Creada",2,() => {
+                Navigate("/Personal/Clinica/Terapias", { replace: true });
+            });
+        })
     }
 
-    const userMenu = (
-    <Menu style={{width:"200px",padding:"0px"}}>
-        <Menu.Item key="2" style={{display:true?"":"none"}}>
-        <Button  onClick={()=>{deleteTera()}} 
-        style={{width:"100%",color:"red"}}>Eliminar</Button>
-        </Menu.Item>
-    </Menu>
-    );
+    const UpdateTera = () => {
+        setloading(true);
+        const vars = Terap.toString(form.getFieldValue());
+
+        Update("Terapia","terapiaInput",vars,"idTerapia",idTE).then((data)=>{
+            if(data == "errors") { setloading(false); return;}
+            message.success("Terapia Actualizada",2,
+            () => {
+                TeraGet();
+            });
+        })
+    }
+
+    const changeST = () => {
+        setLoading(true);
+        ChangeStatus("Terapia","idTerapias",idTE,"activo",Terap.activo,"idTerapia").then((data)=>{
+            if(data == "errors") { setloading(false); return;}
+
+            message.success("Terapia "+(Terap.activo?"Deshabilitada":"Habilitada"),2,() => {
+                TeraGet();
+            });
+        })
+    }
+
+    const userMenu = [
+        {key:"HabDes",label:(Terap.activo?"Deshabilitar":"Habilitar"),onClick:changeST},
+    ]
 
     return(<div>
-        <BlockRead Show={ActionsProvider.isRead}/>
 
         <FormPageHeader 
         ActionProv={ActionsProvider} 
@@ -133,14 +125,16 @@ export default function TeraDetail(){
         ActionProv={ActionsProvider} 
         Loading={Loading} 
         Avatar={""} 
-        Text={Terapia.name}/>
+        Text={Terap.nombreTerapia}
+        Activo={Terap.activo}/>
 
         <Layout 
         className='ContentLayout' 
         style={{display:Loading ? "None":""}}>
 
             <Form 
-            onFinish={()=>{onFinish()}} 
+            disabled={ActionsProvider.isRead}
+            onFinish={()=>{onFinish()}}
             onFinishFailed={(e)=>{form.scrollToField(e.errorFields[0].name)}}
             form={form} 
             size='Default' 
@@ -168,31 +162,49 @@ export default function TeraDetail(){
                     </Typography.Text>
                 </div>
                 <div style={sectionStyle}>
-                    <Title level={4}>Detalles</Title><div>
+                    <Title level={4}>Detalles</Title>
 
                     <Form.Item name="duracion" label="Duracion:" rules={[{
                         required:true,message:"¡Introduzca la Duración!"}]}>
-                        <InputNumber style={{width:"50%"}} type="number" maxLength={3} prefix="Min" placeholder='Duración'/>
+                        <InputNumber 
+                        style={{width:"60%"}} 
+                        type="number"
+                        min={0}
+                        max={240}
+                        prefix="Minutos" 
+                        placeholder='Duración'/>
                     </Form.Item>
 
-                    <div style={{width:"100%"}}> Precio en Sucursal</div>
-                    <InputNumber required prefix="C$" size='large' type="number" value={PSC}
-                    onChange={(value)=>{setPSC(value);setPSD(NIOConvUSD(value))}}
-                    maxLength={5} min={1} max={10000} placeholder='Córdobas' style={{width:"50%"}}/>
-                    <InputNumber prefix="$" size='large' type="number"value={PSD}
-                        onChange={(value)=>{setPSD(value);setPSC(USDConvNIO(value))}}
-                        maxLength={5} min={0.1} max={10000} placeholder='Dólares' style={{width:"50%"}}/>  
-                    </div>
-
-                    <Divider/><div>
-                    <div style={{width:"100%"}}> Precio a Domicilio</div>
-                    <InputNumber required prefix="C$" size='large' type="number" value={PDC}
-                    onChange={(value)=>{setPDC(value);setPDD(NIOConvUSD(value))}}
-                    maxLength={5} min={1} max={10000} placeholder='Córdobas' style={{width:"50%"}}/>
-                    <InputNumber prefix="$" size='large' type="number"value={PDD}
-                        onChange={(value)=>{setPDD(value);setPDC(USDConvNIO(value))}}
-                        maxLength={5} min={0.1} max={10000} placeholder='Dólares' style={{width:"50%"}}/>  
-                    </div>
+                    <Form.Item
+                    name="precioLocal"
+                    label="Precio Local:"
+                    // extra={"C$ "+USDConvNIO(Terap.precioLocal)}
+                    extra={"C$ "+convL}
+                    rules={[{required:true,message:"¡Introduzca el precio en el local!"}]}>
+                        <InputNumber
+                        style={{width:"60%"}}
+                        type="number"
+                        min={0}
+                        max={100}
+                        prefix="$"
+                        placeholder='Precio'
+                        onChange={(e) => {setConvL(USDConvNIO(e))}}/>
+                    </Form.Item>
+                    
+                    <Form.Item
+                    name="precioDomicilio"
+                    label="Precio Domicilio:"
+                    extra={"C$ "+convD}
+                    rules={[{required:true,message:"¡Introduzca el precio en el domicilio!"}]}>
+                        <InputNumber
+                        style={{width:"60%"}}
+                        type="number"
+                        min={0}
+                        max={100}
+                        prefix="$"
+                        placeholder='Precio'
+                        onChange={(e) => {setConvD(USDConvNIO(e))}}/>
+                    </Form.Item>
                                   
                 </div>
 

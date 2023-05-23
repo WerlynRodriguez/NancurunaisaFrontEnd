@@ -1,4 +1,4 @@
-export class ActionsProviders{
+   export class ActionsProviders{
     constructor(ActAct){
         this.ActAct = ActAct;
     }

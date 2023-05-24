@@ -7,6 +7,7 @@ import { FormActions } from '../../../Utils/ActionsProviders';
 import {Item} from '../../../Models/Models';
 import TerapeutaItem from '../../../Components/Items/TerapeutaItem';
 import PageList from '../../../Components/PageList';
+import { message } from "antd";
 
 export default function Pacientes(props) {
     let Navigate = useNavigate();/*Go back */
@@ -64,13 +65,14 @@ export default function Pacientes(props) {
         let ids = info.MultiData.map((item)=>{return item.id});
     
         info.setLoadingList(true);
-        ChangeStatus("Paciente","idUsuarios","["+ids+"]","activo",status,"idUsuario").then((response) => {
-            if (response == "errors") return;
+        ChangeStatus("Paciente","idPacientes","["+ids+"]","activo",status,"idPaciente").then((response) => {
+            if (response == "errors") { info.setLoadingList(false); return; }
 
-            message.success("Usuarios actualizados correctamente",3);
-            info.setSelectionMode(false);
-            info.setMultiData([]);
-            info.fetchData();
+            message.success("Pacientes actualizados correctamente",3, ()=>{
+                info.setSelectionMode(false);
+                info.setMultiData([]);
+                info.fetchData();
+            });
       });
       }
 

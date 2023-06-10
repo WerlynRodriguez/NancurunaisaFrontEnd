@@ -21,7 +21,7 @@ export default function BottomBar (){
     const local = useLocation();
 
     const page = getaction(local.pathname, 2);
-    const pages = {"Citas":0, "Clinica":1, "Home":2, "Reportes":3, "Ajustes":4};
+    const pages = {"Citas":0, "Clinica":1, "Home":2, "Ajustes":4};
 
     const [selected, setSelected] = useState(pages[page]);
 
@@ -40,9 +40,9 @@ export default function BottomBar (){
             case 2:
                 Navigate("/Personal/Home");
                 break;
-            case 3:
-                Navigate("/Personal/Reportes")
-                break;
+            // case 3:
+            //     Navigate("/Personal/Reportes")
+            //     break;
             case 4:
                 Navigate("/Personal/Ajustes");
                 break;
@@ -71,12 +71,12 @@ export default function BottomBar (){
             icon: <HomeOutlined/>,
             iconS: <HomeFilled/>
         },
-        {
-            key: 3,
-            label: "Reportes",
-            icon: <PieChartOutlined/>,
-            iconS: <PieChartFilled/>
-        },
+        // {
+        //     key: 3,
+        //     label: "Reportes",
+        //     icon: <PieChartOutlined/>,
+        //     iconS: <PieChartFilled/>
+        // },
         {
             key: 4,
             label: "Ajustes",

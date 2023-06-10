@@ -426,9 +426,9 @@ export class Cita{
         this.idEstado 
         : 
         getEstadoFromDate(moment(date + " " + time).format('YYYY-MM-DD HH:mm:ss'));
-
-        const auxDate = new Date(date + " " + time);
-        const fechaHora = auxDate.toISOString().split("T")[0] + "T" + time + ":00.000Z";
+        // console.log(moment(date + " " + time).format('YYYY-MM-DD HH:mm:ss'));
+        console.log(date + "T" + time)
+        const fechaHora = date + " " + time + ":00";
 
         return `
         ${this.idCita?`idCita: ${this.idCita},`:''}

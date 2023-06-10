@@ -3,7 +3,7 @@ import { getDateToday } from "./Calwulator";
 // const url = "http://172.23.173.158:5037/api/"
 const url = "http://localhost:5037/api/"
 // Maykol 
-// const endPointGQL = "http://172.23.173.158:5037/graphql/"
+// const endPointGQL = "http://192.168.1.117:5037/graphql/"
 const endPointGQL = "http://localhost:5037/graphql/"
 // Werlyn
 //const endPointGQL = "http://192.168.1.28:5000/graphql/"

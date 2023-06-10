@@ -171,6 +171,7 @@ export default function CitaDetail(){
 
     const StartStopCita = (start) => {
         let vars;
+        console.log(vars)
         if (start) {
             vars = cita.toStringHoras(4);
         }else{
@@ -311,13 +312,13 @@ export default function CitaDetail(){
             style={{width:"100%",backgroundColor:"#212121",color:"white",borderWidth:"0",fontSize:"50px"}}
             type="time" 
             value={time} 
-            onChange={(e)=>{setTime(e.target.value)}}/>
+            onChange={(e)=>{console.log(e.target.value);setTime(e.target.value)}}/>
 
             <input 
             style={{width:"100%",backgroundColor:"#212121",color:"white",borderWidth:"0",fontSize:"25px"}}
             type="date" 
             value={date} 
-            onChange={(e)=>{setDate(e.target.value?e.target.value:today)}}/>
+            onChange={(e)=>{console.log(e.target.value?e.target.value:today); setDate(e.target.value?e.target.value:today)}}/>
 
         </div>
 

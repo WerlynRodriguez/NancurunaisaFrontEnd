@@ -9,7 +9,9 @@ const { Title } = Typography;
 
 export default function FacturaDet (props) {
     let Navigate = useNavigate();
+    let idFac = 0;
     const {idCita , idFactura , action} = props;
+    const [factura, setFactura] = useState(idFactura);
     const [isLoading,setloading]= useState(false);
 
     const [Loading,setLoading] = useState(idFactura ? true:false);
@@ -34,7 +36,7 @@ export default function FacturaDet (props) {
         total
         activo
         `;
-        getById("facturas","idFactura",idFactura,items).then((res) => {
+        getById("facturas","idFactura",(idFactura ? idFactura: idFac),items).then((res) => {
             if (res == "errors") return;
 
             const auxFact = new Factura(res.data.facturas.items[0]);
@@ -59,6 +61,7 @@ export default function FacturaDet (props) {
         setloading(true);
         if (ActionsProvider.isAdd) {
             AddFactu();
+            
         }else{
             
         }
@@ -73,6 +76,7 @@ export default function FacturaDet (props) {
 
             message.success("Facturado", 2, () => {
                 props.onAddFactura();
+                FactGet(res.data.createFactura.idFactura);
             });
         })
     }

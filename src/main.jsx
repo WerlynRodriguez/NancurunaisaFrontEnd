@@ -125,11 +125,11 @@ function Nancurunaisa(){
 
               <Route path='*' element={<Clinica key="ClinicD"/>}/>
             </Route>
-
+{/* 
             <Route path="Reportes" element={<ReportsMenu key="Reportes"/>}/>
             <Route path='Reporte' element={<Outlet key="OutR"/>}>
               <Route path={"Sucursales/:idFec"} element={<SucRep key="RpSuc"/>}/>
-            </Route>
+            </Route> */}
 
             <Route path='Ajustes' element={<Outlet key="OutAju"/>}>
               <Route index element={<Ajustes key="Settings"/>}/>

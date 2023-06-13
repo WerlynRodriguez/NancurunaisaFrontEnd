@@ -157,7 +157,10 @@ export default function FacturaDet(props) {
             <Form.Item
               name="subTotal"
               label="Sub total:"
-              rules={[{ required: true, message: "¡Ingrese el subtotal!" }]}
+              rules={[
+                { required: true, message: "¡Ingrese el subtotal!" },
+                { type: "number", min: 0, max: 99 },
+              ]}
             >
               <InputNumber
                 style={{ width: "100%" }}
@@ -185,6 +188,14 @@ export default function FacturaDet(props) {
               name="descuento"
               label="Descuento:"
               extra={descuentoString}
+              rules={[
+                {
+                  type: "number",
+                  min: 0,
+                  max: 999999,
+                  message: "descuento invalido",
+                },
+              ]}
             >
               <InputNumber
                 style={{ width: "100%" }}

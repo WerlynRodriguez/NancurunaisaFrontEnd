@@ -220,3 +220,18 @@ export async function FecthUSDNIORate(){
   localStorage.setItem('latestRateUpdated', getDateToday());
   return result.conversion_rate;
 }
+
+//======================================================================
+// Calculate Factura
+//======================================================================
+
+/*Get Total*/
+export async function getTotalFactura(idCita) {
+  const res = await fetchGphql(`
+  {
+    totalFactura(idCita: ${idCita})
+  } 
+  `);
+
+  return res;
+};

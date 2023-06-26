@@ -119,9 +119,9 @@ export function FormPageHeader(props){
 
     title={
         <Title 
-        style={{color:ActionsProvider.isAdd?"":"white"}} 
-        level={3}>
-            {ActionsProvider.isAdd? "Añadir "+props.Text:props.Text}
+        level={3}
+        style={{color: "white"}}>
+            {ActionsProvider.isAdd? "Añadir " + props.Text: props.Text}
         </Title>
     }
     extra={[

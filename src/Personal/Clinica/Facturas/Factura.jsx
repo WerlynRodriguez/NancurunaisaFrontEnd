@@ -20,7 +20,7 @@ import {
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { Factura } from "../../../Models/Models";
-import { Create, getById } from "../../../Utils/FetchingInfo";
+import { Create, getById, getTotalFactura as getTotalFacturaById } from "../../../Utils/FetchingInfo";
 const { Title } = Typography;
 
 export default function FacturaDet(props) {
@@ -39,9 +39,14 @@ export default function FacturaDet(props) {
   const [total1, setTotal] = useState("0");
   console.log("state " + total1);
   const [form] = Form.useForm();
+  // var totalFactura = 0;
+  const [totalFactura, setTotalFactura] = useState(0);
 
   useEffect(() => {
-    if (ActionsProvider.isAdd) return;
+    if (ActionsProvider.isAdd){
+      gettotalFactura(); 
+      return;
+    } 
     FactGet(idFactura);
   }, []);
 
@@ -69,6 +74,16 @@ export default function FacturaDet(props) {
       }
     );
   };
+const gettotalFactura = () => {
+  getTotalFacturaById(idCita).then((res) => {
+    if (res == "errors") return;
+    form.setFieldsValue({
+      subTotal: res.data.totalFactura,
+      total: res.data.totalFactura,
+    });
+    setTotalFactura(res.data.totalFactura);
+  })
+};
 
   const onBack = () => {
     if (typeof props.onBack === "function") {
@@ -157,26 +172,16 @@ export default function FacturaDet(props) {
             <Form.Item
               name="subTotal"
               label="Sub total:"
-              rules={[{ required: true, message: "¡Ingrese el subtotal!" }]}
             >
               <InputNumber
                 style={{ width: "100%" }}
                 type="number"
                 min={0}
                 maxLength={6}
-                value={Factu.subTotal}
+                disabled
+                // value={Factu.subTotal}
                 prefix="$"
                 placeholder="Subtotal"
-                onChange={(value) => {
-                  setDescuentoString(
-                    "Porcentaje: " +
-                      parseFloat((Factu.descuento * 100) / value).toFixed(2) +
-                      "%"
-                  );
-                  Factu.subTotal = value;
-                  const newTotal = Factu.subTotal - Factu.descuento; // Calculate the new total value
-                  form.setFieldsValue({ total: newTotal }); // Update the value of the to
-                }}
               />
             </Form.Item>
 
@@ -185,6 +190,7 @@ export default function FacturaDet(props) {
               name="descuento"
               label="Descuento:"
               extra={descuentoString}
+              rules={[{ required: true, message: "¡Ingrese el Descuento!" }]}
             >
               <InputNumber
                 style={{ width: "100%" }}
@@ -192,14 +198,16 @@ export default function FacturaDet(props) {
                 prefix="$"
                 maxLength={6}
                 placeholder="Descuento"
+                defaultValue={0}
+                max={totalFactura}
                 onChange={(value) => {
                   Factu.descuento = value;
                   setDescuentoString(
                     "Porcentaje: " +
-                      parseFloat((value * 100) / Factu.subTotal).toFixed(2) +
+                      parseFloat((value * 100) / totalFactura).toFixed(2) +
                       "%"
                   );
-                  const newTotal = Factu.subTotal - value; // Calculate the new total value
+                  const newTotal = totalFactura - value; // Calculate the new total value
                   form.setFieldsValue({ total: newTotal }); // Update the value of the total field in the form
                 }}
               />
@@ -209,12 +217,12 @@ export default function FacturaDet(props) {
             <Form.Item
               name="total"
               label="Total:"
-              rules={[{ required: true, message: "¡Ingrese el Total!" }]}
             >
               <InputNumber
                 style={{ width: "100%" }}
                 type="number"
-                min={Factu.subTotal - Factu.descuento}
+                prefix="$"
+                disabled
                 maxLength={6}
                 placeholder="Total"
               />

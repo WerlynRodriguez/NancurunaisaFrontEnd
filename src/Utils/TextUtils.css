@@ -7,6 +7,10 @@
     background-color: white;
 }
 
+.CustomTitle {
+    color: white /* Specify the desired color here */
+}
+
 .ContentLayout{
     padding-top: 40px;
     padding-bottom: 100px;
@@ -106,7 +110,7 @@
 }
 .BackImageCollapsible{
     background-size:cover;
-    background-image: url("https://source.unsplash.com/random/800x600");
+    background-color: #5a33ae;
     background-position: center;
     display: flex;
     align-items:flex-start;
@@ -214,7 +218,7 @@
 
 .BackMenu{
     background-size:cover;
-    background-image: url("https://source.unsplash.com/random/800x600");
+    background-color: #5a33ae;
     background-position: center;
     display: flex;
     align-items:flex-start;

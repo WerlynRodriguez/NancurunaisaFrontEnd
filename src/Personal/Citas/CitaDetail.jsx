@@ -134,6 +134,11 @@ export default function CitaDetail(){
                 return;
             }
         }
+        if ((date + "T" + time) <= moment().format('YYYY-MM-DDTHH:mm'))
+        {
+            message.error("La fecha y hora seleccionadas deben ser mayores a la actual");
+            return;
+        }
 
         setloading(true);
         if (ActionsProvider.isAdd) {
@@ -376,7 +381,7 @@ export default function CitaDetail(){
             dataSource={modules[ActualList].lista} 
             grid={grid} 
             renderItem={(item) => (
-                <TeraTaItem item={item} />
+                <TeraTaItem item={item} label={modules[ActualList].label} />
             )}/>
 
             <Button 

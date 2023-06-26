@@ -30,7 +30,7 @@ export default function Terapias(props){
             return new Item(
                 item.idTerapia,
                 [item.nombreTerapia,
-                "L:$"+item.precioLocal+" / D:$"+item.precioDomicilio],
+                "Local: $"+item.precioLocal+" | Domicilio: $"+item.precioDomicilio],
                 "",
                 item.activo, 
                 multidata.find(itemA => itemA.id == item.idTerapia));

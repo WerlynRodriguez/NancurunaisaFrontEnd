@@ -20,7 +20,11 @@ import {
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { Factura } from "../../../Models/Models";
-import { Create, getById, getTotalFactura as getTotalFacturaById } from "../../../Utils/FetchingInfo";
+import {
+  Create,
+  getById,
+  getTotalFactura as getTotalFacturaById,
+} from "../../../Utils/FetchingInfo";
 const { Title } = Typography;
 
 export default function FacturaDet(props) {
@@ -43,10 +47,10 @@ export default function FacturaDet(props) {
   const [totalFactura, setTotalFactura] = useState(0);
 
   useEffect(() => {
-    if (ActionsProvider.isAdd){
-      gettotalFactura(); 
+    if (ActionsProvider.isAdd) {
+      gettotalFactura();
       return;
-    } 
+    }
     FactGet(idFactura);
   }, []);
 
@@ -74,16 +78,16 @@ export default function FacturaDet(props) {
       }
     );
   };
-const gettotalFactura = () => {
-  getTotalFacturaById(idCita).then((res) => {
-    if (res == "errors") return;
-    form.setFieldsValue({
-      subTotal: res.data.totalFactura,
-      total: res.data.totalFactura,
+  const gettotalFactura = () => {
+    getTotalFacturaById(idCita).then((res) => {
+      if (res == "errors") return;
+      form.setFieldsValue({
+        subTotal: res.data.totalFactura,
+        total: res.data.totalFactura,
+      });
+      setTotalFactura(res.data.totalFactura);
     });
-    setTotalFactura(res.data.totalFactura);
-  })
-};
+  };
 
   const onBack = () => {
     if (typeof props.onBack === "function") {
@@ -129,7 +133,7 @@ const gettotalFactura = () => {
   ];
 
   return (
-    <div>
+    <div style={{ backgroundColor: "#5a33ae" }}>
       <FormPageHeader
         ActionProv={ActionsProvider}
         Text="Factura"
@@ -169,10 +173,7 @@ const gettotalFactura = () => {
           <div style={sectionStyle}>
             <Title level={4}>Descripción</Title>
 
-            <Form.Item
-              name="subTotal"
-              label="Sub total:"
-            >
+            <Form.Item name="subTotal" label="Sub total:">
               <InputNumber
                 style={{ width: "100%" }}
                 type="number"
@@ -214,10 +215,7 @@ const gettotalFactura = () => {
             </Form.Item>
 
             <Divider />
-            <Form.Item
-              name="total"
-              label="Total:"
-            >
+            <Form.Item name="total" label="Total:">
               <InputNumber
                 style={{ width: "100%" }}
                 type="number"
